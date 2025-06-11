@@ -1,9 +1,9 @@
 from pydantic import BaseModel, ConfigDict, ValidationError
 from pydantic.networks import IPvAnyAddress
 import json
+import re
 
-
-class alert(BaseModel):
+class Alert(BaseModel):
     cli_ip: IPvAnyAddress
     cli_localhost: bool
     cli_country: str
@@ -15,17 +15,119 @@ class alert(BaseModel):
     srv_asn: int
     
     alert_id: int
-    info: dict
+    info: str
+
+
+class AlertsParser:
+    def __init__(self):
+        # alert IDs that are relevant for the analysis
+        self.relevant_alerts = [40, 41, 42, 61, 68, 79]
+        self.no_ip_redaction = [68, 79]
     
+    def remove_suffix_ip(self, info_string):
+        pattern = (
+            r'^'
+            r'(?!'
+                r'(127\.0\.0\.1|'
+                r'localhost|'
+                r'10\.\d{1,3}\.\d{1,3}\.\d{1,3}|'
+                r'192\.168\.\d{1,3}\.\d{1,3}|'
+                r'172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}'
+                r')'
+            r')'
+            r'(\d{1,3}(?:\.\d{1,3}){3}(?::\d+)?)(?=/)'
+        )
+        return re.sub(pattern, '{REDACTED_IP}', info_string)
     
-alerts_list = []
+    def parse_alert(self, json_data):
+        
+        # validate that json provided is valid
+        if isinstance(json_data, str):
+            try:
+                data = json.loads(json_data)
+            except json.JSONDecodeError as e:
+                raise json.JSONDecodeError(f"Invalid JSON string: {e}")
+        else:
+            data = json_data
+        
+        # get alerts array from json
+        alerts_data = data.get("alerts", [])
+        
+        parsed_alerts = []
+        
+        for alert_data in alerts_data:
+            try:
+                # extract alert id and info string
+                alert_id = alert_data.get("alert_id")
+                info_string = alert_data.get("info", "")
+                
+                # skip alerts that are not relevant for the analysis
+                if not alert_id in self.relevant_alerts:
+                    continue
+                
+                # clean info string to remove sensitive IP addresses at the beginning
+                # This is done to alerts that could contain the host IP inside the info field
+                if not alert_id in self.no_ip_redaction:
+                    info_string = self.remove_suffix_ip(info_string)
+                    
+                if alert_id == 79:
+                    # try to extract description of malicious fingerprint
+                    # this is inside alert.json.flow_risk_info.28
+                    info_string = alert_data.get("json", {}).get("flow_risk_info", {}).get("28", "")
+                    
+                alert = Alert(
+                    cli_ip = alert_data.get("cli_ip", ""),
+                    cli_localhost = alert_data.get("cli_localhost", ""),
+                    cli_country = alert_data.get("cli_country_name", ""),
+                    cli_asn = alert_data.get("cli_asn", ""),
+                    
+                    srv_ip = alert_data.get("srv_ip", ""),
+                    srv_localhost = alert_data.get("srv_localhost", ""),
+                    srv_country = alert_data.get("srv_country_name", ""),
+                    srv_asn = alert_data.get("srv_asn", ""),
+                    
+                    alert_id = alert_id,
+                    info = info_string
+                )
+                                
+                parsed_alerts.append(alert)
+                
+            except KeyError as e:
+                print(f"Missing field in alert: {e}")
+                continue
+            except ValidationError as e:
+                print(f"Validation error: {e}")
+                continue
+        
+        return parsed_alerts
 
-with open('./alerts/alerts_aitest_interhost.jsonl', 'r') as json_file:
-    alerts_list = list(json_file)
 
-for json_str in alerts_list:
-    result = json.loads(json_str)
-    print(f"result: {result}")
 
-for alerts in alerts_list:
-    alert = json.loads(alerts_list[0]).get("alerts", [])
+if __name__ == "__main__":
+    parser = AlertsParser()
+    
+    alerts_list = []
+    
+    try:
+        with open('./alerts/alerts_aitest_interhost.jsonl', 'r') as json_file:
+            alerts_list = list(json_file)
+        
+        for json_str in alerts_list:
+            try:
+                json_data = json.loads(json_str.strip())
+                
+                parsed_alerts = parser.parse_alert(json_data)
+                
+                for alert in parsed_alerts:
+                    print(alert)
+                    print("-" * 10)
+                    
+            except json.JSONDecodeError as e:
+                print(f"Error parsing JSON: {e}")
+            except Exception as e:
+                print(f"Error processing alert: {e}")
+                
+    except FileNotFoundError:
+        print("File not found. Please check the file path.")
+    except Exception as e:
+        print(f"Error reading file: {e}")
