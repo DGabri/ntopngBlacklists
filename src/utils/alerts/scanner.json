@@ -1,0 +1,116 @@
+{
+    "version": "0.2",
+    "timestamp": 1748882461,
+    "sharedsecret": "",
+    "alerts": [
+        {
+            "cli_continent_name": "NA",
+            "proto.ndpi": "FTP_CONTROL",
+            "ifid": 0,
+            "tstamp": 1748882456,
+            "cli_host_pool_id": 0,
+            "is_flow_alert": true,
+            "input_snmp": 0,
+            "output_snmp": 0,
+            "cli2srv_bytes": 108,
+            "cli_network": 4294967295,
+            "cli_ip": "34.42.214.138",
+            "cli_os": "",
+            "alert_category": 1,
+            "srv_host_pool_id": 0,
+            "srv_continent_name": "EU",
+            "cli2srv_packets": 2,
+            "score": 210,
+            "srv_name": "gpuserver-gabri.interhost.it",
+            "is_cli_attacker": false,
+            "first_seen": 1748882450,
+            "is_srv_victim": false,
+            "info": "",
+            "require_attention": true,
+            "cli_asn": 396982,
+            "flow_risk_bitmap": 37154697198436350,
+            "ip_version": 4,
+            "alert_id": 79,
+            "l7_master_proto": 0,
+            "entity_val": "flow",
+            "json": {
+                "alerts": {
+                    "52": {
+                        "score": 10,
+                        "alert_generation": {
+                            "script_key": "ndpi_unsafe_protocol",
+                            "subdir": "flow"
+                        }
+                    },
+                    "79": {
+                        "score": 100,
+                        "alert_generation": {
+                            "script_key": "ndpi_malicious_fingerprint",
+                            "subdir": "flow"
+                        }
+                    },
+                    "90": {
+                        "score": 50,
+                        "risk_id": 50,
+                        "alert_generation": {
+                            "script_key": "ndpi_tcp_issues",
+                            "subdir": "flow"
+                        }
+                    },
+                    "101": {
+                        "score": 50,
+                        "risk_id": 55,
+                        "alert_generation": {
+                            "script_key": "ndpi_probing_attempt",
+                            "subdir": "flow"
+                        }
+                    }
+                },
+                "ntopng.key": 4133635245,
+                "flow_risk_info": {
+                    "28": "Massive scanner detected (probably masscan)",
+                    "50": "Connection refused (server)",
+                    "55": "TCP probing attempt"
+                },
+                "hash_entry_id": 7675967
+            },
+            "srv2cli_packets": 1,
+            "metadata": [],
+            "proto": 6,
+            "pool_id": 0,
+            "srv_city_name": "Mantignano-Ugnano",
+            "srv_localhost": true,
+            "cli_location": 0,
+            "srv_country_name": "IT",
+            "srv_blacklisted": false,
+            "vlan_id": 0,
+            "entity_id": 4,
+            "l7_proto": 1,
+            "srv_asn": 24994,
+            "community_id": "1:xFn6TdYKHrdOUe1bN91g9SubDt4=",
+            "srv2cli_bytes": 54,
+            "is_srv_attacker": false,
+            "srv_location_lon": 11.1747,
+            "cli_blacklisted": false,
+            "srv_port": 21,
+            "cli_port": 45432,
+            "cli_location_lat": 41.261902,
+            "srv_location_lat": 43.799198,
+            "cli_name": "",
+            "cli_city_name": "Council Bluffs",
+            "cli_localhost": false,
+            "l7_cat": 7,
+            "cli_location_lon": -95.860802,
+            "is_cli_victim": false,
+            "observation_point_id": 0,
+            "srv_ip": "212.54.224.108",
+            "srv_location": 1,
+            "cli_country_name": "US",
+            "srv_os": "Windows 10",
+            "action": "store",
+            "alerts_map": "20040080000010000000000000",
+            "srv_network": 2,
+            "probe_ip": "0.0.0.0"
+        }
+    ]
+}

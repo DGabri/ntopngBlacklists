@@ -24,3 +24,4 @@ Analyzed alerts are disjoint so it is not possible to register two of the report
 
 1. Injection (ID: 40, 41, 68)
 2. Scanner (ID: 42, 79)
+3. SSH brute force

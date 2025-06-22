@@ -1,0 +1,116 @@
+{
+    "version": "0.2",
+    "timestamp": 1748883263,
+    "sharedsecret": "",
+    "alerts": [
+        {
+            "proto.ndpi": "SSH",
+            "observation_point_id": 0,
+            "is_cli_victim": false,
+            "srv_location_lat": 43.799198,
+            "ip_version": 4,
+            "cli_localhost": false,
+            "srv_port": 22,
+            "srv_asn": 24994,
+            "proto": 6,
+            "cli_os": "",
+            "l7_master_proto": 0,
+            "cli_asn": 38731,
+            "cli_network": 4294967295,
+            "pool_id": 0,
+            "cli_host_pool_id": 0,
+            "output_snmp": 0,
+            "entity_id": 4,
+            "srv_os": "Windows 10",
+            "srv_localhost": true,
+            "action": "store",
+            "is_flow_alert": true,
+            "srv_continent_name": "EU",
+            "alerts_map": "2000004000000200",
+            "srv_ip": "212.54.224.108",
+            "first_seen": 1748883259,
+            "l7_cat": 100,
+            "cli_continent_name": "AS",
+            "is_srv_victim": false,
+            "cli_location_lat": 10.8891,
+            "tstamp": 1748883261,
+            "cli2srv_bytes": 2054,
+            "cli_ip": "171.244.40.232",
+            "cli_location_lon": 106.595001,
+            "require_attention": false,
+            "input_snmp": 0,
+            "cli_name": "",
+            "metadata": [],
+            "score": 250,
+            "srv_location_lon": 11.1747,
+            "probe_ip": "0.0.0.0",
+            "vlan_id": 0,
+            "cli2srv_packets": 7,
+            "flow_risk_bitmap": 281474976972800,
+            "cli_blacklisted": true,
+            "entity_val": "flow",
+            "srv2cli_bytes": 2262,
+            "l7_proto": 92,
+            "info": "SSH-2.0-libssh2_1.11.1",
+            "json": {
+                "alerts": {
+                    "9": {
+                        "cli_blacklisted": true,
+                        "score": 50,
+                        "alert_generation": {
+                            "script_key": "blacklisted_client_contact",
+                            "subdir": "flow"
+                        },
+                        "custom_cat_file": "IPsum Threat Intelligence Feed",
+                        "uid": 7677729,
+                        "cat_blacklisted": true,
+                        "srv_blacklisted": false
+                    },
+                    "38": {
+                        "score": 100,
+                        "ndpi_breed_name": "Acceptable",
+                        "ndpi_category": 100,
+                        "alert_generation": {
+                            "script_key": "remote_to_local_insecure_flow",
+                            "subdir": "flow"
+                        },
+                        "ndpi_category_name": "Malware",
+                        "ndpi_breed": 1
+                    },
+                    "61": {
+                        "score": 100,
+                        "alert_generation": {
+                            "script_key": "ndpi_ssh_obsolete_client",
+                            "subdir": "flow"
+                        }
+                    }
+                },
+                "blacklist": "IPsum Threat Intelligence Feed",
+                "ntopng.key": 2150370782,
+                "flow_risk_info": {
+                    "18": "Found cipher arcfour128",
+                    "48": "125 sec"
+                },
+                "hash_entry_id": 7677729
+            },
+            "srv_country_name": "IT",
+            "is_cli_attacker": false,
+            "srv_city_name": "Mantignano-Ugnano",
+            "srv2cli_packets": 8,
+            "alert_category": 1,
+            "srv_host_pool_id": 0,
+            "cli_country_name": "VN",
+            "is_srv_attacker": false,
+            "srv_location": 1,
+            "srv_blacklisted": false,
+            "community_id": "1:9/A+ForldLV/RXR/2I2DWcTS+yE=",
+            "ifid": 0,
+            "alert_id": 61,
+            "srv_name": "gpuserver-gabri.interhost.it",
+            "cli_port": 34030,
+            "cli_location": 0,
+            "cli_city_name": "Hóc Môn",
+            "srv_network": 2
+        }
+    ]
+}

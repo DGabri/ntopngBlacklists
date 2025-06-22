@@ -1,0 +1,202 @@
+{
+    "version": "0.2",
+    "timestamp": 1748882390,
+    "sharedsecret": "",
+    "alerts": [
+        {
+            "community_id": "1:Om9eI4THMdkTo0UNmgQrBTlLChk=",
+            "srv_asn": 24994,
+            "srv_name": "gpuserver-gabri.interhost.it",
+            "cli_continent_name": "EU",
+            "flow_risk_bitmap": 6144,
+            "cli_city_name": "Hauzenberg (Germannsdorf)",
+            "score": 110,
+            "ifid": 0,
+            "input_snmp": 0,
+            "cli_location_lat": 48.624199,
+            "cli_port": 33256,
+            "tstamp": 1748882384,
+            "srv_location": 1,
+            "is_cli_attacker": true,
+            "cli_asn": 51396,
+            "cli_network": 4294967295,
+            "output_snmp": 0,
+            "srv_location_lon": 11.1747,
+            "srv_host_pool_id": 0,
+            "srv_port": 80,
+            "entity_id": 4,
+            "cli2srv_packets": 4,
+            "srv_localhost": true,
+            "is_srv_victim": true,
+            "cli_location": 0,
+            "ip_version": 4,
+            "cli2srv_bytes": 315,
+            "srv_network": 2,
+            "pool_id": 0,
+            "vlan_id": 0,
+            "srv_continent_name": "EU",
+            "cli_blacklisted": false,
+            "srv_os": "Windows 10",
+            "metadata": [],
+            "probe_ip": "0.0.0.0",
+            "is_flow_alert": true,
+            "srv_city_name": "Mantignano-Ugnano",
+            "json": {
+                "alerts": {
+                    "42": {
+                        "score": 100,
+                        "alert_generation": {
+                            "script_key": "ndpi_http_suspicious_user_agent",
+                            "subdir": "flow"
+                        }
+                    },
+                    "43": {
+                        "score": 10,
+                        "alert_generation": {
+                            "script_key": "ndpi_numeric_ip_host",
+                            "subdir": "flow"
+                        }
+                    }
+                },
+                "flow_risk_info": {
+                    "11": "Empty or missing User-Agent",
+                    "12": "Found host 212.54.224.108"
+                },
+                "hash_entry_id": 7675807,
+                "ntopng.key": 2222566879
+            },
+            "info": "212.54.224.108:80/",
+            "l7_error_code": 200,
+            "cli_ip": "176.65.148.236",
+            "srv_location_lat": 43.799198,
+            "is_cli_victim": false,
+            "require_attention": false,
+            "entity_val": "flow",
+            "srv2cli_bytes": 2962,
+            "action": "store",
+            "proto.ndpi": "HTTP",
+            "alert_id": 42,
+            "cli_location_lon": 13.6687,
+            "cli_host_pool_id": 0,
+            "srv_blacklisted": false,
+            "cli_os": "",
+            "cli_localhost": false,
+            "observation_point_id": 0,
+            "l7_master_proto": 0,
+            "l7_proto": 7,
+            "cli_name": "",
+            "alerts_map": "0C0000000000",
+            "alert_category": 1,
+            "first_seen": 1748882383,
+            "l7_cat": 5,
+            "cli_country_name": "DE",
+            "srv_country_name": "IT",
+            "srv2cli_packets": 4,
+            "proto": 6,
+            "is_srv_attacker": false,
+            "srv_ip": "212.54.224.108"
+        },
+        {
+            "community_id": "1:BIJU97fPqIKx/g0fi8ETvK+Iakw=",
+            "srv_asn": 24994,
+            "srv_name": "gpuserver-gabri.interhost.it",
+            "cli_continent_name": "EU",
+            "flow_risk_bitmap": 37154697194242050,
+            "cli_city_name": "Hauzenberg (Germannsdorf)",
+            "score": 200,
+            "ifid": 0,
+            "input_snmp": 0,
+            "cli_location_lat": 48.624199,
+            "cli_port": 45994,
+            "tstamp": 1748882389,
+            "srv_location": 1,
+            "is_cli_attacker": false,
+            "cli_asn": 51396,
+            "cli_network": 4294967295,
+            "output_snmp": 0,
+            "srv_location_lon": 11.1747,
+            "srv_host_pool_id": 0,
+            "srv_port": 80,
+            "entity_id": 4,
+            "cli2srv_packets": 2,
+            "srv_localhost": true,
+            "is_srv_victim": false,
+            "cli_location": 0,
+            "ip_version": 4,
+            "cli2srv_bytes": 108,
+            "srv_network": 2,
+            "pool_id": 0,
+            "vlan_id": 0,
+            "srv_continent_name": "EU",
+            "cli_blacklisted": false,
+            "srv_os": "Windows 10",
+            "metadata": [],
+            "probe_ip": "0.0.0.0",
+            "is_flow_alert": true,
+            "srv_city_name": "Mantignano-Ugnano",
+            "json": {
+                "alerts": {
+                    "79": {
+                        "score": 100,
+                        "alert_generation": {
+                            "script_key": "ndpi_malicious_fingerprint",
+                            "subdir": "flow"
+                        }
+                    },
+                    "90": {
+                        "score": 50,
+                        "risk_id": 50,
+                        "alert_generation": {
+                            "script_key": "ndpi_tcp_issues",
+                            "subdir": "flow"
+                        }
+                    },
+                    "101": {
+                        "score": 50,
+                        "risk_id": 55,
+                        "alert_generation": {
+                            "script_key": "ndpi_probing_attempt",
+                            "subdir": "flow"
+                        }
+                    }
+                },
+                "flow_risk_info": {
+                    "28": "Massive scanner detected (probably zmap)",
+                    "50": "Connection refused (client)",
+                    "55": "TCP probing attempt"
+                },
+                "hash_entry_id": 7675806,
+                "ntopng.key": 2222551057
+            },
+            "info": "",
+            "cli_ip": "176.65.148.236",
+            "srv_location_lat": 43.799198,
+            "is_cli_victim": false,
+            "require_attention": true,
+            "entity_val": "flow",
+            "srv2cli_bytes": 58,
+            "action": "store",
+            "proto.ndpi": "HTTP",
+            "alert_id": 79,
+            "cli_location_lon": 13.6687,
+            "cli_host_pool_id": 0,
+            "srv_blacklisted": false,
+            "cli_os": "",
+            "cli_localhost": false,
+            "observation_point_id": 0,
+            "l7_master_proto": 0,
+            "l7_proto": 7,
+            "cli_name": "",
+            "alerts_map": "20040080000000000000000000",
+            "alert_category": 1,
+            "first_seen": 1748882383,
+            "l7_cat": 5,
+            "cli_country_name": "DE",
+            "srv_country_name": "IT",
+            "srv2cli_packets": 1,
+            "proto": 6,
+            "is_srv_attacker": false,
+            "srv_ip": "212.54.224.108"
+        }
+    ]
+}

@@ -1,0 +1,12 @@
+kafka:
+  bootstrap_servers: "localhost:9092"
+  group_id: "alerts-group"
+  auto_offset_reset: "earliest"
+  enable_auto_commit: true
+  client_id: "my-app"
+  auto_commit_interval_ms: 5000
+  producer_topic: "alerts"
+  consumer_topic: 
+    - "alerts"
+  compression_type: "lz4"
+  acks: "all"
