@@ -5,8 +5,8 @@ kafka:
   enable_auto_commit: true
   client_id: "my-app"
   auto_commit_interval_ms: 5000
-  producer_topic: "alerts"
+  producer_topic: "blacklist-events"
   consumer_topic: 
-    - "alerts"
+    - "blacklist-events"
   compression_type: "lz4"
   acks: "all"

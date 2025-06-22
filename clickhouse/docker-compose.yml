@@ -1,0 +1,77 @@
+services:
+  clickhouse1:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse1
+    hostname: clickhouse1
+    volumes:
+      - ./clickhouse1/config:/etc/clickhouse-server/config.d
+      - ./clickhouse1/users:/etc/clickhouse-server/users.d
+      - ./clickhouse1/data:/var/lib/clickhouse
+    ports:
+      - "8130:8123"
+      - "9010:9000"
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    depends_on:
+      - keeper1
+      - keeper2
+      - keeper3
+    networks:
+      - clickhouse_replica
+
+  clickhouse2:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse2
+    hostname: clickhouse2
+    volumes:
+      - ./clickhouse2/config:/etc/clickhouse-server/config.d
+      - ./clickhouse2/users:/etc/clickhouse-server/users.d
+      - ./clickhouse2/data:/var/lib/clickhouse
+    ports:
+      - "8131:8123"
+      - "9011:9000"
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    depends_on:
+      - keeper1
+      - keeper2
+      - keeper3
+    networks:
+      - clickhouse_replica
+
+  keeper1:
+    image: clickhouse/clickhouse-keeper:latest
+    container_name: keeper1
+    hostname: keeper1
+    volumes:
+      - ./keeper1/config.xml:/etc/clickhouse-keeper/keeper_config.xml
+    networks:
+      - clickhouse_replica
+
+  keeper2:
+    image: clickhouse/clickhouse-keeper:latest
+    container_name: keeper2
+    hostname: keeper2
+    volumes:
+      - ./keeper2/config.xml:/etc/clickhouse-keeper/keeper_config.xml
+    networks:
+      - clickhouse_replica
+
+  keeper3:
+    image: clickhouse/clickhouse-keeper:latest
+    container_name: keeper3
+    hostname: keeper3
+    volumes:
+      - ./keeper3/config.xml:/etc/clickhouse-keeper/keeper_config.xml
+    networks:
+      - clickhouse_replica
+
+networks:
+  clickhouse_replica:
+    driver: bridge

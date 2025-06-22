@@ -14,13 +14,12 @@ echo "[+] Kafka up, creating topis"
 # kafka setup
 # 30 minutes = 1800000ms for retention
 KAFKA_HOST="kafka:29092"
-PARTITION_COUNT=1
+PARTITION_COUNT=10
 RETENTION_MS=1800000
 REPLICATION_FACTOR=1
 
 # Topic names
-TOPIC_NAME="alerts"
-
+TOPIC_NAME="blacklist-events"
 
 echo "[1] Creating topics "
 

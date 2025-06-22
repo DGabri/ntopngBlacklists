@@ -9,7 +9,8 @@ msg_schema = """
     {"name": "ip", "type": "string"},
     {"name": "alert_id", "type": "int"},
     {"name": "dst_port", "type": "int"},
-    {"name": "info", "type": "string"}
+    {"name": "info", "type": "string"},
+    {"name": "reason", "type": "string"}
   ]
 }
 """
