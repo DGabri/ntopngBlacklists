@@ -10,3 +10,12 @@ kafka:
     - "blacklist-events"
   compression_type: "lz4"
   acks: "all"
+redis:
+  bootstrap_servers:
+    - "localhost:7001"
+    - "localhost:7002"
+    - "localhost:7003"
+    - "localhost:7004"
+    - "localhost:7005"
+    - "localhost:7006"
+  ttl: 3600

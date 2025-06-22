@@ -6,13 +6,40 @@ class ConfigManager:
         if config_path is None:
             # Use kafka_config.yaml in the same directory as this file
             current_dir = os.path.dirname(os.path.abspath(__file__))
-            config_path = os.path.join(current_dir, 'kafka_config.yaml')
+            config_path = os.path.join(current_dir, 'config.yaml')
             
         with open(config_path, 'r') as f:
-            config = yaml.safe_load(f)
+            self.config = yaml.safe_load(f)
     
-        self.kafka_config = config.get("kafka", {})
+        self.kafka_config = self.config.get("kafka", {})
 
+    def get_redis_config(self):
+        self.redis_config = self.config.get("redis", {})
+
+        bootstrap_servers = []
+
+        for server in self.redis_config.get("bootstrap_servers", []):
+            try:
+                host, port = server.split(':')
+                bootstrap_servers.append({"host": host, "port": int(port)})
+            except ValueError:
+                print(f"Invalid format reading redis config. Please use - 'host:port' ")
+                continue 
+        
+        # get ttl
+        ttl = self.redis_config.get("ttl")
+
+        if len(bootstrap_servers):
+            # return redis configuration if at least one bootstrap server is provided, else raise exception
+            redis_config = {
+                "bootstrap_servers": bootstrap_servers,
+                "ttl": ttl
+            }
+            return redis_config
+        
+        # no bootstrap server found        
+        raise Exception("No boostrap server found, please set it in config.yaml")
+        
     def get_producer_config(self):
         producer_config =  {
             "bootstrap.servers": self.kafka_config.get("bootstrap_servers"),
@@ -43,7 +70,3 @@ class ConfigManager:
     def get_consumer_topic(self):
         # get topic name for consumer, required list in kafka
         return self.kafka_config.get("consumer_topic")
-    
-#t = ConfigManager()
-#t.get_producer_config()
-#t.get_consumer_config()
