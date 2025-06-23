@@ -1,4 +1,4 @@
-from ..utils.config_manager import ConfigManager
+from ..config.config_manager import ConfigManager
 from ..models.alert_scheme import Alert
 from ipaddress import IPv4Address
 from typing import List, Tuple
