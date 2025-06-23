@@ -61,6 +61,7 @@ class AlertsConsumer:
             if (alert_id > 0) and self.is_valid_ip(ip):
                 count = self.redis.increment_ip_blacklist(alert_id, ip)
                 self.consumed_messages += 1
+                #print(f"[CONSUMER] IP: {ip} -> {count}")
             else:
                 print(f"[INVALID IP] {ip}")
         except Exception as e:
