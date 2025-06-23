@@ -10,8 +10,6 @@ class ConfigManager:
             
         with open(config_path, 'r') as f:
             self.config = yaml.safe_load(f)
-    
-        self.kafka_config = self.config.get("kafka", {})
 
     def get_redis_config(self):
         self.redis_config = self.config.get("redis", {})
@@ -40,24 +38,27 @@ class ConfigManager:
         # no bootstrap server found        
         raise Exception("No boostrap server found, please set it in config.yaml")
         
-    def get_producer_config(self):
+    def get_kafka_producer_config(self):
+        self.kafka_config = self.config.get("kafka", {})
+        
         producer_config =  {
-            "bootstrap.servers": self.kafka_config.get("bootstrap_servers"),
-            "client.id": self.kafka_config.get("client_id"),
-            "compression.type": self.kafka_config.get("compression_type"),
-            "acks": self.kafka_config.get("acks"),
+            "bootstrap.servers": self.kafka_config.get("bootstrap_servers", "localhost:9092"),
+            "client.id": self.kafka_config.get("client_id", "blacklist-generator"),
+            "compression.type": self.kafka_config.get("compression_type", "lz4"),
+            "acks": self.kafka_config.get("acks", "all"),
         }
         
         print(f"[CONFIG MANAGER] Producer config: {producer_config}")
         return producer_config
 
-    def get_consumer_config(self):
+    def get_kafka_consumer_config(self):
+        self.kafka_config = self.config.get("kafka", {})
         consumer_config = {
-            "bootstrap.servers": self.kafka_config.get("bootstrap_servers"),
-            "group.id": self.kafka_config.get("group_id"),
-            "auto.offset.reset": self.kafka_config.get("auto_offset_reset"),
-            "enable.auto.commit": self.kafka_config.get("enable_auto_commit"),
-            "client.id": self.kafka_config.get("client_id")
+            "bootstrap.servers": self.kafka_config.get("bootstrap_servers", "localhost:9092"),
+            "group.id": self.kafka_config.get("group_id", "alerts-group"),
+            "auto.offset.reset": self.kafka_config.get("auto_offset_reset", "earliest"),
+            "enable.auto.commit": self.kafka_config.get("enable_auto_commit", True),
+            "client.id": self.kafka_config.get("client_id", "blacklist-generator")
         }
 
         print(f"[CONFIG MANAGER] Consumer config: {consumer_config}")
@@ -70,3 +71,15 @@ class ConfigManager:
     def get_consumer_topic(self):
         # get topic name for consumer, required list in kafka
         return self.kafka_config.get("consumer_topic")
+    
+    def get_alerts_generator_config(self):
+        self.alert_generator_config = self.config.get("alerts_generator", {})
+        
+        alert_generator_config = {
+            "num_alerts": self.alert_generator_config.get("num_alerts", 10000),
+            "num_ip_addresses": self.alert_generator_config.get("num_ip_addresses", 100),
+            "alert_interarrival_ms": self.alert_generator_config.get("alert_interarrival_ms", 10)
+        }
+
+        print(f"[CONFIG MANAGER] Alert generator config: {alert_generator_config}")
+        return alert_generator_config

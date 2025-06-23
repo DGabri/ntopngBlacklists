@@ -6,6 +6,7 @@ from confluent_kafka import Producer
 from datetime import datetime
 import json
 import time
+import uuid
 
 class AlertsProducer:
     def __init__(self):
@@ -13,28 +14,30 @@ class AlertsProducer:
         self.config_manager = ConfigManager()
         self.avro_utils = AvroUtils()
         
-        self.config = self.config_manager.get_producer_config()
+        self.config = self.config_manager.get_kafka_producer_config()
         self.topic = self.config_manager.get_producer_topic()
         
         # producer instance initialization from config
         self.producer = Producer(**self.config)
+        
+        # sample user uuid to send the message in kafka
+        self.user_id = uuid.uuid4()
 
     def _delivery_report(self, err, msg):
         """Delivery report callback called by confluent-kafka producer"""
         if err is not None:
             print(f"Message delivery failed: {err}")
-        else:
-            print(f"Message delivered to {msg.topic()} [{msg.partition()}] offset {msg.offset()}")
 
-    def send_event(self, user_id, timestamp, ip, alert_id, dst_port, info):
+    def send_event(self, timestamp, ip, alert_id, dst_port, info, reason):
         
         event_data = {
-            "user_id": int(user_id),
+            "user_id": str(self.user_id),
             "timestamp": int(timestamp),
             "ip": str(ip),
             "alert_id": int(alert_id),
             "dst_port": int(dst_port),
-            "info": str(info)
+            "info": str(info),
+            "reason": str(reason)
         }
 
         serialized_value = self.avro_utils.serialize_msg(event_data)
@@ -61,12 +64,12 @@ class AlertsProducer:
 
 if __name__ == "__main__":
     
-    generator = AlertsGenerator(num_alerts=50, alerts_interarrival_ms=0)
+    generator = AlertsGenerator()
     producer = AlertsProducer()
     
-    for alert_num in range(0, 200, 1):
+    for alert_num in range(0, 10000, 1):
         alert = generator.generate_alert()
-        producer.send_event(user_id=int(12345), timestamp=int(time.time()*1000), ip=str(alert.cli_ip), alert_id=int(alert.alert_id), dst_port=int(alert.srv_port), info=str(alert.info))
+        producer.send_event(timestamp=int(time.time()*1000), ip=str(alert.cli_ip), alert_id=int(alert.alert_id), dst_port=int(alert.srv_port), info=str(alert.info), reason=str(alert.reason))
         
     #producer.send_batch_events(sample_events)
     producer.close()

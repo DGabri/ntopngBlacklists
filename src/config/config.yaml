@@ -3,7 +3,7 @@ kafka:
   group_id: "alerts-group"
   auto_offset_reset: "earliest"
   enable_auto_commit: true
-  client_id: "my-app"
+  client_id: "blacklist-generator"
   auto_commit_interval_ms: 5000
   producer_topic: "blacklist-events"
   consumer_topic: 
@@ -19,3 +19,8 @@ redis:
     - "localhost:7005"
     - "localhost:7006"
   ttl: 3600
+
+alerts_generator:
+  num_alerts: 100000
+  num_ip_addresses: 10
+  alert_interarrival_ms: 10

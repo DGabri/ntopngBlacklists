@@ -1,10 +1,10 @@
 msg_schema = """
 {
   "type": "record",
-  "name": "SecurityEvent",
-  "namespace": "security.events",
+  "name": "alertEvent",
+  "namespace": "alert.events",
   "fields": [
-    {"name": "user_id", "type": "long"},
+    {"name": "user_id", "type": "string"},
     {"name": "timestamp", "type": "long"},
     {"name": "ip", "type": "string"},
     {"name": "alert_id", "type": "int"},

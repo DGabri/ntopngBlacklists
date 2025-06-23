@@ -1,17 +1,27 @@
+from ..utils.config_manager import ConfigManager
 from ..models.alert_scheme import Alert
 from ipaddress import IPv4Address
 from typing import List, Tuple
+from faker import Faker
 import logging
 import random
 import time
 
 class AlertsGenerator:
     
-    def __init__(self, num_alerts, alerts_interarrival_ms):
-        self.num_alerts = num_alerts
-        self.alerts_interval = alerts_interarrival_ms
+    def __init__(self):
+        # config reader
+        self.config_manager = ConfigManager()
+        self.config = self.config_manager.get_alerts_generator_config()
         
+        self.num_alerts = self.config.get("num_alerts", 1000)
+        self.alerts_interval = self.config.get("alert_interarrival_ms", 0.2)
+        self.num_unique_ip_addresses = self.config.get("num_ip_addresses", 100)
+      
+        # alert ids
         self.alert_ids = [40, 41, 42, 68, 61, 79]
+        # generate ip addresses
+        self.ip_addresses = self.generate_unique_ip_addresses()
         
         self.countries_asns = {
             'US': [7922, 15169, 16509, 20940, 36351],
@@ -79,24 +89,16 @@ class AlertsGenerator:
             "/project/.git/config",
         ]
     
-    def generate_ip(self, is_localhost=None):
-        """Generate a random IP address, optionally forcing localhost/private"""
-        if is_localhost is None:
-            is_localhost = random.choice([True, False])
+    def generate_unique_ip_addresses(self):
+        """Generate a mix of private and public IP addresses"""
+        fake = Faker()
         
-        if is_localhost:
-            # Generate private IP
-            range_choice = random.choice(self.private_ranges)
-            start_ip = int(IPv4Address(range_choice[0]))
-            end_ip = int(IPv4Address(range_choice[1]))
-            random_int = random.randint(start_ip, end_ip)
-            return IPv4Address(random_int)
-        else:
-            # Generate public IP (avoiding private ranges)
-            while True:
-                ip = IPv4Address(random.randint(1, 4294967294))  # Avoid 0.0.0.0 and 255.255.255.255
-                if not ip.is_private and not ip.is_multicast and not ip.is_reserved:
-                    return ip
+        ip_addresses = set()
+        
+        while len(ip_addresses) < self.num_unique_ip_addresses:
+            ip_addresses.add(fake.ipv4_public())
+        
+        return list(ip_addresses)
     
     def generate_alert_id(self):
         """Generate a random alert ID from the available types"""
@@ -117,6 +119,20 @@ class AlertsGenerator:
         elif alert_id == 79:  # Malicious Fingerprint
             return random.choice(self.scanner_info)
     
+    def generate_alert_reason(self, alert_id):
+        if alert_id == 40:  # SQL Injection
+            return "Detected SQL Inj in logs"
+        elif alert_id == 41:  # RCE Injection
+            return "Detected malicious code in logs"
+        elif alert_id == 42:  # Empty or missing user agent
+            return random.choice(["Missing UA", "Empty UA"])
+        elif alert_id == 68:  # Possible Exploit
+            return random.choice(["log4j detected", "reverse shell detected"])
+        elif alert_id == 61:  # SSH obsolete version
+            return "Obsolete SSH client version"
+        elif alert_id == 79:  # Malicious Fingerprint
+            return random.choice(["TCP Fingerprint", "JA4 Fingerprint"])
+        
     def generate_country_code(self):
         """Generate a random country code"""
         return random.choice(list(self.countries_asns.keys()))
@@ -138,19 +154,27 @@ class AlertsGenerator:
         elif alert_id == 61:  # SSH obsolete version
             return 22
         
-    def generate_alerts(self):
-        """Generate the specified number of alerts with realistic data"""
+    def generate_alerts(self, callback=None):
+        """Generate the specified number of alerts with realistic data
+        
+        Args:
+            callback: Optional function to call after each alert is generated.
+                    The callback will receive the alert as its parameter.
+        """
         alerts = []
         
         for alert_idx in range(self.num_alerts):
             alert = self.generate_alert()
-            
             alerts.append(alert)
             
-            #print(alert.model_dump(mode='json'))
+            # call callback if provided, send to kafka
+            if callback:
+                try:
+                    callback(alert)
+                except Exception as e:
+                    print(f"Callback failed: {e}")
             
             # Sleep between alerts (convert ms to seconds)
-            # Don't sleep after the last alert
             if alert_idx < self.num_alerts - 1:
                 time.sleep(self.alerts_interval / 1000)
         
@@ -162,7 +186,7 @@ class AlertsGenerator:
         
         # Generate client info
         cli_localhost = random.choice([True, False])
-        cli_ip = self.generate_ip(cli_localhost)
+        cli_ip = random.choice(self.ip_addresses)
         cli_country = self.generate_country_code()
         cli_asn = self.generate_asn(cli_country)
         
@@ -173,13 +197,14 @@ class AlertsGenerator:
         else:
             srv_localhost = random.choice([True, False])
         
-        srv_ip = self.generate_ip(srv_localhost)
+        srv_ip = random.choice(self.ip_addresses)
         srv_country = self.generate_country_code()
         srv_asn = self.generate_asn(srv_country)
         srv_port = self.generate_srv_port(alert_id)
         
         # Generate alert description
         info = self.generate_alert_description(alert_id)
+        reason = self.generate_alert_reason(alert_id)
         
         # Create alert object
         alert = Alert(
@@ -195,7 +220,8 @@ class AlertsGenerator:
             srv_asn=srv_asn,
             
             alert_id=alert_id,
-            info=info
+            info=info,
+            reason=reason
         )
         
         return alert

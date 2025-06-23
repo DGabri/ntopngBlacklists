@@ -16,9 +16,5 @@ class Alert(BaseModel):
     
     alert_id: int
     info: str
+    reason: str
     
-    class Config:
-        json_encoders = {
-            IPv4Address: str,
-            IPv6Address: str
-        }
