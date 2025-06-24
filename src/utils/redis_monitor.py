@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from ..utils.redis_utils import RedisClusterConnector
+from utils.redis_utils import RedisClusterConnector
 import time
 
 redis = RedisClusterConnector()

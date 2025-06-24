@@ -4,7 +4,7 @@ import os
 class ConfigManager:
     def __init__(self, config_path=None):
         if config_path is None:
-            # Use kafka_config.yaml in the same directory as this file
+            # get config.yaml
             current_dir = os.path.dirname(os.path.abspath(__file__))
             config_path = os.path.join(current_dir, 'config.yaml')
             
@@ -33,6 +33,7 @@ class ConfigManager:
                 "bootstrap_servers": bootstrap_servers,
                 "ttl": ttl
             }
+            print(f"[CONFIG MANAGER] Redis config: {redis_config}")
             return redis_config
         
         # no bootstrap server found        
@@ -47,9 +48,8 @@ class ConfigManager:
             "compression.type": self.kafka_config.get("compression_type", "lz4"),
             "acks": self.kafka_config.get("acks", "all"),
         }
-            #"schema.registry.url": self.kafka_config.get("schema_registry_url", "http://localhost:8081"),
         
-        print(f"[CONFIG MANAGER] Producer config: {producer_config}")
+        print(f"[CONFIG MANAGER] Kafka Producer config: {producer_config}")
         return producer_config
 
     def get_kafka_consumer_config(self):

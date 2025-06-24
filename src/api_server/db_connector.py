@@ -47,7 +47,7 @@ class ClickhouseConnector:
             connection = mysql.connector.connect(**conn_params)
             yield connection
         except mysql.connector.Error as err:
-            self.logging.error(f"Database connection error: {err}")
+            print(f"Database connection error: {err}")
             raise
         finally:
             if connection and connection.is_connected():
@@ -77,7 +77,7 @@ class ClickhouseConnector:
                     connection.commit()
 
             except mysql.connector.Error as err:
-                self.logging.error(f"Query execution error: {err}")
+                print(f"Query execution error: {err}")
                 connection.rollback()
                 raise
             finally:

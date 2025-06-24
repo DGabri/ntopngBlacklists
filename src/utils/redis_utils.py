@@ -1,6 +1,6 @@
+from redis.cluster import RedisCluster, ClusterNode
 from config.config_manager import ConfigManager
 from datetime import datetime, timedelta
-from redis.cluster import RedisCluster
 import redis
 import json
 
@@ -14,15 +14,19 @@ class RedisClusterConnector:
             
             # use 1h of ttl if it is not specified
             self.ttl = self.redis_config.get("ttl", 3600)
-            
             # safely access 0, if no bootstrap server is provided the config raises an exception
-            bootstrap_servers = self.redis_config.get("bootstrap_servers")[0]
-            host = str(bootstrap_servers['host'])
-            port = int(bootstrap_servers['port'])
+            bootstrap_servers = self.redis_config.get("bootstrap_servers")
+            
+            print(f"[REDIS BOOSTRAP SERVERS] {bootstrap_servers}")
+            
+            startup_nodes =[]
+            for node in bootstrap_servers:
+                c = ClusterNode(host=node['host'],port=node['port'])
+                startup_nodes.append(c)
+                
             
             self.connector = RedisCluster(
-                host=host, 
-                port=port,
+                startup_nodes=startup_nodes,
                 decode_responses=True
             )
 

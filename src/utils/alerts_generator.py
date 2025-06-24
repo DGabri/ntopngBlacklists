@@ -1,5 +1,5 @@
 from ipaddress import IPv4Address, IPv6Address
-from config_manager import ConfigManager
+from config.config_manager import ConfigManager
 from typing import List, Tuple
 from pydantic import BaseModel
 from typing import Union

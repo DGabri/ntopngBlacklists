@@ -21,7 +21,7 @@ REPLICATION_FACTOR=1
 # Topic names
 TOPIC_NAME="blacklist-events"
 
-if ! kafka-topics --bootstrap-server kafka:29092 --list | grep -q "blacklist-events"; then
+if kafka-topics --bootstrap-server kafka:29092 --list | grep -wq "$TOPIC_NAME"; then
   # create topic
   kafka-topics --create \
     --bootstrap-server $KAFKA_HOST \
@@ -29,7 +29,8 @@ if ! kafka-topics --bootstrap-server kafka:29092 --list | grep -q "blacklist-eve
     --partitions $PARTITION_COUNT \
     --replication-factor $REPLICATION_FACTOR \
     --config retention.ms=$RETENTION_MS \
-    --config compression.type=lz4
+    --config compression.type=lz4 \
+    --if-not-exists
 
   echo "[1.1] Created topic: $TOPIC_NAME "
 else

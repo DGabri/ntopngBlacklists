@@ -3,14 +3,12 @@ FROM python:3.10-slim
 WORKDIR /app
 
 # install requirements
-COPY consumer/requirements.txt /app/
+COPY consumer/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# copy files
-COPY consumer/consumer.py /app/
-COPY config/config_manager.py /app/
-COPY config/config.yaml /app/
-COPY utils/redis_utils.py /app/
+# copy entire src folder content to /app
+COPY . .
 
-# Run the consumer script
-CMD ["python", "consumer.py"]
+ENV PYTHONPATH=/app
+
+CMD ["python", "consumer/consumer.py"]

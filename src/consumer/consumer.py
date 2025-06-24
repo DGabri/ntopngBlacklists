@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from confluent_kafka import Consumer, KafkaException, KafkaError
-from config_manager import ConfigManager
-from redis_utils import RedisClusterConnector
+from config.config_manager import ConfigManager
+from utils.redis_utils import RedisClusterConnector 
 import json
 
 class AlertsConsumer:
@@ -31,8 +31,9 @@ class AlertsConsumer:
                         continue
                     else:
                         raise KafkaException(msg.error())
-
-                self.process_msg(msg.value().decode('utf-8'))
+                event = msg.value().decode('utf-8')
+                print(f"[CONSUMER] Message received: {event}")
+                self.process_msg(event)
 
         except KeyboardInterrupt:
             print("Consumer interrupted by user")
@@ -55,7 +56,8 @@ class AlertsConsumer:
             msg = json.loads(msg)
             alert_id = int(msg.get("alert_id", -1))
             ip = str(msg.get("ip", ""))
-                        
+            print(f"[CONSUMER] Received: {msg}")
+            
             if (alert_id > 0) and self.is_valid_ip(ip):
                 count = self.redis.increment_ip_blacklist(alert_id, ip)
                 

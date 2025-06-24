@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from alerts_generator import AlertsGenerator
-from config_manager import ConfigManager
+from utils.alerts_generator import AlertsGenerator
+from config.config_manager import ConfigManager
 from confluent_kafka import Producer
 from datetime import datetime
 import json
@@ -37,7 +37,9 @@ class AlertsProducer:
             "info": str(info),
             "reason": str(reason)
         }
-
+        
+        print(f"[PRODUCER] Delivering: {event_data}")
+        
         try:
             self.producer.produce(
                 topic=self.topic,

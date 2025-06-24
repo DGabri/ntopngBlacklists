@@ -125,18 +125,18 @@ services:
         CONTAINERS="clickhouse1 clickhouse2"
         INIT_SQL_FILE="/clickhouse/create_tables.sql"
         
-        for CONTAINER in $CONTAINERS; do
-          echo "Waiting $CONTAINER to be available"
+        for CONTAINER in $$CONTAINERS; do
+          echo "Waiting $$CONTAINER to be available"
           
-          until docker exec "$CONTAINER" clickhouse-client -q "SELECT 1" >/dev/null 2>&1; do
-            echo "Waiting $CONTAINER"
+          until docker exec "$$CONTAINER" clickhouse-client -q "SELECT 1" >/dev/null 2>&1; do
+            echo "Waiting $$CONTAINER"
             sleep 2
           done
           
-          echo "$CONTAINER ready"
+          echo "$$CONTAINER ready"
           
-          docker exec -i "$CONTAINER" clickhouse-client --multiquery < "$INIT_SQL_FILE"
-          echo "Script executed $CONTAINER complete."
+          docker exec -i "$$CONTAINER" clickhouse-client --multiquery < "$$INIT_SQL_FILE"
+          echo "Script executed $$CONTAINER complete."
         done
         
         echo "All ClickHouse containers initialized successfully"
@@ -390,21 +390,20 @@ services:
   redis-cluster-creator:
     image: redis:8.2-m01-alpine
     container_name: redis-cluster-creator
-    command: |
+    command: >
       sh -c '
-        echo "Waiting for Redis nodes to be ready..."
-        sleep 15
-        echo "Creating Redis cluster..."
+        echo "Waiting for Redis nodes to be ready...";
+        for port in 7001 7002 7003 7004 7005 7006; do
+          until redis-cli -h redis-$((port-7000)) -p $$port ping | grep -q PONG; do
+            echo "Waiting for redis-$((port-7000)) on port $$port...";
+            sleep 2;
+          done;
+        done;
+        echo "All Redis nodes are ready. Creating cluster...";
         redis-cli --cluster create \
-          redis-1:7001 \
-          redis-2:7002 \
-          redis-3:7003 \
-          redis-4:7004 \
-          redis-5:7005 \
-          redis-6:7006 \
-          --cluster-replicas 1 \
-          --cluster-yes
-        echo "Cluster creation completed"
+          redis-1:7001 redis-2:7002 redis-3:7003 redis-4:7004 redis-5:7005 redis-6:7006 \
+          --cluster-replicas 1 --cluster-yes;
+        echo "Cluster creation completed";
       '
     depends_on:
       redis-1:
@@ -453,7 +452,7 @@ services:
       - kafka-network
     volumes:
       - ./src:/app
-    command: python producer.py
+    command: python producer/producer.py
 
   consumer:
     build:
@@ -464,14 +463,14 @@ services:
       clickhouse-init:
         condition: service_completed_successfully
       kafka:
-        condition: service_started
+        condition: service_completed_successfully
       redis-cluster-creator:
         condition: service_completed_successfully
     networks:
       - kafka-network
     volumes:
       - ./src:/app
-    command: python consumer.py
+    command: python consumer/consumer.py
 
 
 networks:
