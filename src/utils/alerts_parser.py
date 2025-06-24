@@ -1,7 +1,26 @@
-from ..models.alert_scheme import Alert
+from ipaddress import IPv4Address, IPv6Address
+from pydantic import BaseModel
+from typing import Union
 import json
 import re
 
+
+class Alert(BaseModel):
+    cli_ip: Union[IPv4Address, IPv6Address, str]
+    cli_localhost: bool
+    cli_country: str
+    cli_asn: int
+    
+    srv_ip: Union[IPv4Address, IPv6Address, str]
+    srv_localhost: bool
+    srv_country: str
+    srv_asn: int
+    srv_port: int = 0
+    
+    alert_id: int
+    info: str
+    reason: str
+    
 class AlertsParser:
     def __init__(self):
         # alert IDs that are relevant for the analysis
@@ -85,34 +104,3 @@ class AlertsParser:
                 continue
         
         return parsed_alerts
-
-
-
-if __name__ == "__main__":
-    parser = AlertsParser()
-    
-    alerts_list = []
-    
-    try:
-        with open('./alerts/alerts_aitest_interhost.jsonl', 'r') as json_file:
-            alerts_list = list(json_file)
-        
-        for json_str in alerts_list:
-            try:
-                json_data = json.loads(json_str.strip())
-                
-                parsed_alerts = parser.parse_alert(json_data)
-                
-                for alert in parsed_alerts:
-                    print(alert)
-                    print("-" * 10)
-                    
-            except json.JSONDecodeError as e:
-                print(f"Error parsing JSON: {e}")
-            except Exception as e:
-                print(f"Error processing alert: {e}")
-                
-    except FileNotFoundError:
-        print("File not found. Please check the file path.")
-    except Exception as e:
-        print(f"Error reading file: {e}")

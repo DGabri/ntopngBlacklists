@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-from ..utils.alerts_generator import AlertsGenerator
-from ..config.config_manager import ConfigManager
+from alerts_generator import AlertsGenerator
+from config_manager import ConfigManager
 from confluent_kafka import Producer
 from datetime import datetime
 import json
@@ -63,10 +63,13 @@ if __name__ == "__main__":
     generator = AlertsGenerator()
     producer = AlertsProducer()
     num_alerts = generator.num_alerts
+    print("************************************************************")
     print(f"[PRODUCER] Generating: {num_alerts} alerts")
     
     for alert_num in range(0, num_alerts, 1):
         alert = generator.generate_alert()
+        generator.print_alert(alert)
         producer.send_event(timestamp=int(time.time()*1000), ip=str(alert.cli_ip), alert_id=int(alert.alert_id), dst_port=int(alert.srv_port), info=str(alert.info), reason=str(alert.reason))
+    print("************************************************************")
         
     producer.close()

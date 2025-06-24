@@ -1,4 +1,4 @@
-from ..config.config_manager import ConfigManager
+from config.config_manager import ConfigManager
 from datetime import datetime, timedelta
 from redis.cluster import RedisCluster
 import redis

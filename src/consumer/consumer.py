@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from confluent_kafka import Consumer, KafkaException, KafkaError
-from ..config.config_manager import ConfigManager
-from ..utils.redis_utils import RedisClusterConnector
+from config_manager import ConfigManager
+from redis_utils import RedisClusterConnector
 import json
 
 class AlertsConsumer:

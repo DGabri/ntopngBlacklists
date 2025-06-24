@@ -21,18 +21,24 @@ REPLICATION_FACTOR=1
 # Topic names
 TOPIC_NAME="blacklist-events"
 
+if ! kafka-topics --bootstrap-server kafka:29092 --list | grep -q "blacklist-events"; then
+  # create topic
+  kafka-topics --create \
+    --bootstrap-server $KAFKA_HOST \
+    --topic $TOPIC_NAME \
+    --partitions $PARTITION_COUNT \
+    --replication-factor $REPLICATION_FACTOR \
+    --config retention.ms=$RETENTION_MS \
+    --config compression.type=lz4
+
+  echo "[1.1] Created topic: $TOPIC_NAME "
+else
+    echo "Topic 'blacklist-events' already exists - skipping creation"
+fi
+
 echo "[1] Creating topics "
 
-# create injection attacks topic
-kafka-topics --create \
-  --bootstrap-server $KAFKA_HOST \
-  --topic $TOPIC_NAME \
-  --partitions $PARTITION_COUNT \
-  --replication-factor $REPLICATION_FACTOR \
-  --config retention.ms=$RETENTION_MS \
-  --config compression.type=lz4
 
-echo "[1.1] Created topic: $TOPIC_NAME "
 
 # show all topics
 echo "[2] List of topics:"

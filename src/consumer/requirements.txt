@@ -1,3 +1,5 @@
-avro==1.12.0
 confluent-kafka==2.10.1
 pydantic==2.11.7
+PyYAML==6.0.2
+redis==5.2.1
+Faker==37.4.0

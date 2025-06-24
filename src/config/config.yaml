@@ -1,27 +1,26 @@
 kafka:
-  bootstrap_servers: "localhost:9092"
+  bootstrap_servers: "kafka:29092"
   group_id: "alerts-group"
   auto_offset_reset: "earliest"
   enable_auto_commit: true
   client_id: "blacklist-generator"
   auto_commit_interval_ms: 5000
   producer_topic: "blacklist-events"
-  schema_registry_url: "http://localhost:8081"
   consumer_topic: 
     - "blacklist-events"
   compression_type: "lz4"
   acks: "all"
 redis:
   bootstrap_servers:
-    - "localhost:7001"
-    - "localhost:7002"
-    - "localhost:7003"
-    - "localhost:7004"
-    - "localhost:7005"
-    - "localhost:7006"
+    - "redis-1:7001"
+    - "redis-2:7002"
+    - "redis-3:7003"
+    - "redis-4:7004"
+    - "redis-5:7005"
+    - "redis-6:7006"
   ttl: 3600
 
 alerts_generator:
-  num_alerts: 1000
+  num_alerts: 10000
   num_ip_addresses: 10
   alert_interarrival_ms: 10

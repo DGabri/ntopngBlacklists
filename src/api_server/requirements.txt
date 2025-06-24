@@ -1,0 +1,7 @@
+mysql-connector-python==9.2.0
+fastapi==0.115.13
+requests==2.32.4
+redis==5.2.1
+Faker==37.4.0
+uvicorn==0.34.3
+PyYAML==6.0.2

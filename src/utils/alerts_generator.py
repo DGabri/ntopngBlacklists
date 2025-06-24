@@ -1,12 +1,30 @@
-from ..config.config_manager import ConfigManager
-from ..models.alert_scheme import Alert
-from ipaddress import IPv4Address
+from ipaddress import IPv4Address, IPv6Address
+from config_manager import ConfigManager
 from typing import List, Tuple
+from pydantic import BaseModel
+from typing import Union
 from faker import Faker
 import logging
 import random
 import time
 
+
+class Alert(BaseModel):
+    cli_ip: Union[IPv4Address, IPv6Address, str]
+    cli_localhost: bool
+    cli_country: str
+    cli_asn: int
+    
+    srv_ip: Union[IPv4Address, IPv6Address, str]
+    srv_localhost: bool
+    srv_country: str
+    srv_asn: int
+    srv_port: int = 0
+    
+    alert_id: int
+    info: str
+    reason: str
+    
 class AlertsGenerator:
     
     def __init__(self):
