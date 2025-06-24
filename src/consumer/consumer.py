@@ -31,9 +31,9 @@ class AlertsConsumer:
                         continue
                     else:
                         raise KafkaException(msg.error())
-                event = msg.value().decode('utf-8')
-                print(f"[CONSUMER] Message received: {event}")
-                self.process_msg(event)
+                
+                print(f"[CONSUMER] Message received")
+                self.process_msg(msg.value().decode('utf-8'))
 
         except KeyboardInterrupt:
             print("Consumer interrupted by user")

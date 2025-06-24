@@ -1,4 +1,4 @@
-CREATE TABLE kafka_messages1 (
+CREATE TABLE kafka_messages (
     user_id UUID,
     timestamp UInt64,
     ip String,
@@ -24,8 +24,7 @@ CREATE TABLE clean_alerts (
     info String,
     reason String
 )
-ENGINE = ReplacingMergeTree()
-ORDER BY (user_id, alert_id, timestamp); 
+ENGINE = MergeTree(); 
 
 CREATE MATERIALIZED VIEW mv_alerts_consumer TO clean_alerts AS
 SELECT
@@ -36,4 +35,4 @@ SELECT
     dst_port,
     info,
     reason
-FROM kafka_messages1;
+FROM kafka_messages;

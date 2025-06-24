@@ -26,6 +26,12 @@ services:
     ports:
       - "9092:9092"
       - "9093:9093"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29092"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -392,18 +398,41 @@ services:
     container_name: redis-cluster-creator
     command: >
       sh -c '
-        echo "Waiting for Redis nodes to be ready...";
-        for port in 7001 7002 7003 7004 7005 7006; do
-          until redis-cli -h redis-$((port-7000)) -p $$port ping | grep -q PONG; do
-            echo "Waiting for redis-$((port-7000)) on port $$port...";
+        echo "Waiting for all Redis nodes to be ready...";
+        for i in 1 2 3 4 5 6; do
+          port=$$((7000 + i));
+          until redis-cli -h redis-$$i -p $$port ping | grep -q PONG; do
+            echo "Waiting for redis-$$i on port $$port...";
             sleep 2;
           done;
+          echo "redis-$$i is ready";
         done;
+
+        echo "Checking if cluster already exists...";
+        if redis-cli -h redis-1 -p 7001 cluster info | grep -q "cluster_state:ok"; then
+          echo "Redis cluster already exists and is healthy";
+          redis-cli -h redis-1 -p 7001 cluster info;
+          redis-cli -h redis-1 -p 7001 cluster nodes;
+          echo "Cluster setup completed (already existed)";
+          exit 0;
+        fi;
+
         echo "All Redis nodes are ready. Creating cluster...";
         redis-cli --cluster create \
           redis-1:7001 redis-2:7002 redis-3:7003 redis-4:7004 redis-5:7005 redis-6:7006 \
           --cluster-replicas 1 --cluster-yes;
-        echo "Cluster creation completed";
+        if [ $$? -eq 0 ]; then
+          echo "Redis cluster created successfully";
+          exit 0;
+        else
+          echo "Failed to create Redis cluster";
+          exit 1;
+        fi;
+        echo "Verifying cluster status...";
+        redis-cli -h redis-1 -p 7001 cluster info;
+        redis-cli -h redis-1 -p 7001 cluster nodes;
+        echo "Cluster setup completed";
+        exit 0;
       '
     depends_on:
       redis-1:
@@ -463,7 +492,7 @@ services:
       clickhouse-init:
         condition: service_completed_successfully
       kafka:
-        condition: service_completed_successfully
+        condition: service_healthy
       redis-cluster-creator:
         condition: service_completed_successfully
     networks:
