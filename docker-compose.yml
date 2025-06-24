@@ -81,7 +81,6 @@ services:
       networks:
         - kafka-network
 
-  # **INDENTATION FIX HERE** (clickhouse2 was incorrectly indented)
   clickhouse2:
       image: clickhouse/clickhouse-server:latest
       container_name: clickhouse2
@@ -104,6 +103,22 @@ services:
         - keeper3
       networks:
         - kafka-network
+  clickhouse-init:
+    image: bash
+    container_name: clickhouse-init
+    depends_on:
+      - clickhouse1
+      - clickhouse2
+    volumes:
+      - ./init_clickhouse.sh:/init_clickhouse.sh
+      - ./clickhouse/create_tables.sql:/create_tables.sql
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: >
+      bash -c "
+        chmod +x /init_clickhouse.sh && \
+        /init_clickhouse.sh
+      "
+    network_mode: host
 
   keeper1:
     image: clickhouse/clickhouse-keeper:latest
@@ -302,7 +317,6 @@ services:
         condition: service_healthy
     network_mode: host
     restart: "no"
-    
 networks:
   kafka-network:
     driver: bridge

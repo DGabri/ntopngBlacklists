@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-from ..config.config_manager import ConfigManager
-from ..utils.avro_utils import AvroUtils
 from ..utils.alerts_generator import AlertsGenerator
+from ..config.config_manager import ConfigManager
 from confluent_kafka import Producer
 from datetime import datetime
 import json
@@ -12,7 +11,6 @@ class AlertsProducer:
     def __init__(self):
         # config reader and topic getter
         self.config_manager = ConfigManager()
-        self.avro_utils = AvroUtils()
         
         self.config = self.config_manager.get_kafka_producer_config()
         self.topic = self.config_manager.get_producer_topic()
@@ -40,12 +38,10 @@ class AlertsProducer:
             "reason": str(reason)
         }
 
-        serialized_value = self.avro_utils.serialize_msg(event_data)
-        
         try:
             self.producer.produce(
                 topic=self.topic,
-                value=serialized_value,
+                value=json.dumps(event_data).encode('utf-8'),
                 callback=self._delivery_report
             )
             
@@ -66,10 +62,11 @@ if __name__ == "__main__":
     
     generator = AlertsGenerator()
     producer = AlertsProducer()
+    num_alerts = generator.num_alerts
+    print(f"[PRODUCER] Generating: {num_alerts} alerts")
     
-    for alert_num in range(0, 10000, 1):
+    for alert_num in range(0, num_alerts, 1):
         alert = generator.generate_alert()
         producer.send_event(timestamp=int(time.time()*1000), ip=str(alert.cli_ip), alert_id=int(alert.alert_id), dst_port=int(alert.srv_port), info=str(alert.info), reason=str(alert.reason))
         
-    #producer.send_batch_events(sample_events)
     producer.close()

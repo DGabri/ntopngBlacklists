@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 from confluent_kafka import Consumer, KafkaException, KafkaError
 from ..config.config_manager import ConfigManager
-from ..utils.avro_utils import AvroUtils
 from ..utils.redis_utils import RedisClusterConnector
+import json
 
 class AlertsConsumer:
     def __init__(self):
         # config reader and topic getter
         self.config_manager = ConfigManager()
-        self.avro_utils = AvroUtils()
         
         self.config = self.config_manager.get_kafka_consumer_config()
         self.topic = self.config_manager.get_consumer_topic()
@@ -19,7 +18,6 @@ class AlertsConsumer:
         
         # redis connector
         self.redis = RedisClusterConnector()
-        self.consumed_messages = 0
         
     def consume_loop(self):
         try:
@@ -34,9 +32,7 @@ class AlertsConsumer:
                     else:
                         raise KafkaException(msg.error())
 
-                # Deserialize Avro message
-                event = self.avro_utils.deserialize_msg(msg.value())
-                self.process_msg(event)
+                self.process_msg(msg.value().decode('utf-8'))
 
         except KeyboardInterrupt:
             print("Consumer interrupted by user")
@@ -54,14 +50,16 @@ class AlertsConsumer:
     
     # clean message and update redis queue
     def process_msg(self, msg):
+        
         try:
+            msg = json.loads(msg)
             alert_id = int(msg.get("alert_id", -1))
             ip = str(msg.get("ip", ""))
-            
+                        
             if (alert_id > 0) and self.is_valid_ip(ip):
                 count = self.redis.increment_ip_blacklist(alert_id, ip)
-                self.consumed_messages += 1
-                #print(f"[CONSUMER] IP: {ip} -> {count}")
+                
+                print(f"[CONSUMER] IP: {ip} -> {count}")
             else:
                 print(f"[INVALID IP] {ip}")
         except Exception as e:

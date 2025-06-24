@@ -47,6 +47,7 @@ class ConfigManager:
             "compression.type": self.kafka_config.get("compression_type", "lz4"),
             "acks": self.kafka_config.get("acks", "all"),
         }
+            #"schema.registry.url": self.kafka_config.get("schema_registry_url", "http://localhost:8081"),
         
         print(f"[CONFIG MANAGER] Producer config: {producer_config}")
         return producer_config
