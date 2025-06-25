@@ -31,7 +31,8 @@ class ConfigManager:
             # return redis configuration if at least one bootstrap server is provided, else raise exception
             redis_config = {
                 "bootstrap_servers": bootstrap_servers,
-                "ttl": ttl
+                "ttl": ttl,
+                "dedup_ttl": self.redis_config.get("dedup_ttl", 3600)
             }
             print(f"[CONFIG MANAGER] Redis config: {redis_config}")
             return redis_config
@@ -47,6 +48,7 @@ class ConfigManager:
             "client.id": self.kafka_config.get("client_id", "blacklist-generator"),
             "compression.type": self.kafka_config.get("compression_type", "lz4"),
             "acks": self.kafka_config.get("acks", "all"),
+            "enable.idempotence": self.kafka_config.get("enable_idempotence", True),
         }
         
         print(f"[CONFIG MANAGER] Kafka Producer config: {producer_config}")

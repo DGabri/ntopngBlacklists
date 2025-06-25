@@ -14,6 +14,8 @@ class RedisClusterConnector:
             
             # use 1h of ttl if it is not specified
             self.ttl = self.redis_config.get("ttl", 3600)
+            self.dedup_ttl = self.redis_config.get("dedup_ttl", 3600)
+            
             # safely access 0, if no bootstrap server is provided the config raises an exception
             bootstrap_servers = self.redis_config.get("bootstrap_servers")
             
@@ -34,17 +36,58 @@ class RedisClusterConnector:
             print(f"[REDIS UTILS] Failed to connect to Redis cluster: {e}")
             raise
     
+    ## deduplication handler
+    def generate_dedup_key(self, alert):
+       
+        # get values, else false to handle incorrect received messages
+        timestamp = alert.get('timestamp', False)
+        alert_id = alert.get('alert_id', False)
+        user_id = alert.get('user_id', False)
+        ip = alert.get('ip', False)
+        info = alert.get('info', False)
+        reason = alert.get('reason', False)
+
+        if not (timestamp or alert_id or user_id or ip or info or reason):
+            return ""
+        
+        return f"dedup:{user_id}:{timestamp}:{alert_id}:{ip}:{info}:{reason}"
+
+    def is_duplicate(self, alert):
+        try:
+            dedup_key = self.generate_dedup_key(alert)
+            
+            if not len(dedup_key):
+                return True
+            
+
+            # returns true if kwy was set, so no duplicate. If duplicate returns false
+            result = self.connector.set(dedup_key, "processed", nx=True, ex=self.dedup_ttl)
+            
+            if result:
+                return False
+            else:
+                print(f"[DEDUP] Duplicate alert detected: {dedup_key}")
+                return True
+                
+        except Exception as e:
+            print(f"[REDIS UTILS] Error in deduplication check: {e}")
+            return False
+    
     # generate redis key given an alert id
     def get_alert_id_key(self, alert_id):
 
         return f"blacklist:{alert_id}:ip_counters"
     
     # increment ip count in alert id blacklist, return new count
-    def increment_ip_blacklist(self, alert_id, ip):
+    def increment_ip_blacklist(self, alert, alert_id, ip):
         
         key = self.get_alert_id_key(alert_id)
         
         try:
+            # check if duplicate, return -1
+            if self.is_duplicate(alert):
+                return -1
+            
             # pipeline for atomic ops
             pipe = self.connector.pipeline()
             

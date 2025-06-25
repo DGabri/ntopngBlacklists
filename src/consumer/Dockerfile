@@ -11,4 +11,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["python", "consumer/consumer.py"]
+CMD ["python", "-u", "consumer/consumer.py"]

@@ -1,8 +1,9 @@
 kafka:
   bootstrap_servers: "kafka:29092"
   group_id: "alerts-group"
-  auto_offset_reset: "earliest"
+  auto_offset_reset: "latest"
   enable_auto_commit: true
+  enable_idempotence: true
   client_id: "blacklist-generator"
   auto_commit_interval_ms: 5000
   producer_topic: "blacklist-events"
@@ -19,6 +20,7 @@ redis:
     - "redis-5:7005"
     - "redis-6:7006"
   ttl: 3600
+  dedup_ttl: 3600
 
 alerts_generator:
   num_alerts: 10

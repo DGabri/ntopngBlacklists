@@ -127,7 +127,6 @@ services:
       sh -c '
         apk add --no-cache docker-cli
         
-        # Use sh-compatible syntax instead of bash arrays
         CONTAINERS="clickhouse1 clickhouse2"
         INIT_SQL_FILE="/clickhouse/create_tables.sql"
         
@@ -488,18 +487,21 @@ services:
       context: ./src
       dockerfile: consumer/Dockerfile
     container_name: consumer
+    restart: unless-stopped
     depends_on:
-      clickhouse-init:
-        condition: service_completed_successfully
       kafka:
         condition: service_healthy
-      redis-cluster-creator:
-        condition: service_completed_successfully
+      redis-1:
+        condition: service_healthy
+      redis-2:
+        condition: service_healthy
+      redis-3:
+        condition: service_healthy
     networks:
       - kafka-network
     volumes:
       - ./src:/app
-    command: python consumer/consumer.py
+    command: python -u consumer/consumer.py
 
 
 networks:

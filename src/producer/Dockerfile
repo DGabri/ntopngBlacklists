@@ -11,4 +11,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["python", "producer/producer.py"]
+CMD ["python", "-u", "producer/producer.py"]
