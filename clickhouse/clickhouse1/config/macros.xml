@@ -1,7 +1,7 @@
-<clickhouse>
+<yandex>
     <macros>
+        <cluster>my_cluster</cluster>
         <shard>01</shard>
-        <replica>01</replica>
-        <cluster>cluster_1S_2R</cluster>
+        <replica>clickhouse1</replica>
     </macros>
-</clickhouse>
+</yandex>

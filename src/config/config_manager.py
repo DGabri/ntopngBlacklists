@@ -86,3 +86,17 @@ class ConfigManager:
 
         print(f"[CONFIG MANAGER] Alert generator config: {alert_generator_config}")
         return alert_generator_config
+    
+    def get_clickhouse_config(self):
+        self.db_config = self.config.get("clickhouse", {})
+        
+        db_config = {
+            "host": self.db_config.get("host", 'clickhouse1'),
+            "port": self.db_config.get("port", 8123),
+            "user": self.db_config.get("user", 'default'),
+            "password": self.db_config.get("password", ''),
+            "database": self.db_config.get("database", 'default'),
+        }
+
+        print(f"[CONFIG MANAGER] Database config: {db_config}")
+        return db_config

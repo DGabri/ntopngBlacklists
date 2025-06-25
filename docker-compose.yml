@@ -67,50 +67,62 @@ services:
 
   # Clickhouse
   clickhouse1:
-      image: clickhouse/clickhouse-server:latest
-      container_name: clickhouse1
-      hostname: clickhouse1
-      volumes:
-        - ./clickhouse/clickhouse1/config:/etc/clickhouse-server/config.d
-        - ./clickhouse/clickhouse1/users:/etc/clickhouse-server/users.d
-        - ./clickhouse/clickhouse1/data:/var/lib/clickhouse
-      ports:
-        - "8130:8123"
-        - "9010:9000"
-      ulimits:
-        nproc: 65535
-        nofile:
-          soft: 262144
-          hard: 262144
-      depends_on:
-        - keeper1
-        - keeper2
-        - keeper3
-      networks:
-        - kafka-network
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse1
+    hostname: clickhouse1
+    environment:
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ./clickhouse/clickhouse1/config:/etc/clickhouse-server/config.d
+      - ./clickhouse/clickhouse1/users:/etc/clickhouse-server/users.d
+      - ./clickhouse/clickhouse1/data:/var/lib/clickhouse
+      - ./clickhouse/clickhouse1/logs:/var/log/clickhouse-server
+    ports:
+      - "8130:8123"
+      - "9010:9000"
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    depends_on:
+      - keeper1
+      - keeper2
+      - keeper3
+    networks:
+      - kafka-network
+    restart: unless-stopped
 
   clickhouse2:
-      image: clickhouse/clickhouse-server:latest
-      container_name: clickhouse2
-      hostname: clickhouse2
-      volumes:
-        - ./clickhouse/clickhouse2/config:/etc/clickhouse-server/config.d
-        - ./clickhouse/clickhouse2/users:/etc/clickhouse-server/users.d
-        - ./clickhouse/clickhouse2/data:/var/lib/clickhouse
-      ports:
-        - "8131:8123"
-        - "9011:9000"
-      ulimits:
-        nproc: 65535
-        nofile:
-          soft: 262144
-          hard: 262144
-      depends_on:
-        - keeper1
-        - keeper2
-        - keeper3
-      networks:
-        - kafka-network
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse2
+    hostname: clickhouse2
+    environment:
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: password
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: 1
+    volumes:
+      - ./clickhouse/clickhouse2/config:/etc/clickhouse-server/config.d
+      - ./clickhouse/clickhouse2/users:/etc/clickhouse-server/users.d
+      - ./clickhouse/clickhouse2/data:/var/lib/clickhouse
+      - ./clickhouse/clickhouse2/logs:/var/log/clickhouse-server
+    ports:
+      - "8131:8123"
+      - "9011:9000"
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 262144
+        hard: 262144
+    depends_on:
+      - keeper1
+      - keeper2
+      - keeper3
+    networks:
+      - kafka-network
+    restart: unless-stopped
 
   clickhouse-init:
     image: alpine:latest
@@ -125,26 +137,47 @@ services:
       - ./clickhouse/create_tables.sql:/clickhouse/create_tables.sql
     entrypoint: |
       sh -c '
-        apk add --no-cache docker-cli
+        apk add --no-cache docker-cli curl
         
         CONTAINERS="clickhouse1 clickhouse2"
         INIT_SQL_FILE="/clickhouse/create_tables.sql"
-        
+        CREATE_USER_SQL="CREATE USER IF NOT EXISTS test IDENTIFIED WITH plaintext_password BY '\''password'\'' HOST ANY;"
+
+        GRANT_SELECT_SQL="GRANT SELECT(timestamp, alert_id, info, reason, ip) ON default.blacklist_events TO test;"
+        GRANT_INSERT_SQL="GRANT INSERT(user_id, timestamp, ip, alert_id, dst_port, info, reason) ON default.blacklist_events TO test;"
+    
         for CONTAINER in $$CONTAINERS; do
-          echo "Waiting $$CONTAINER to be available"
+          echo "Waiting for $$CONTAINER to be available..."
           
-          until docker exec "$$CONTAINER" clickhouse-client -q "SELECT 1" >/dev/null 2>&1; do
-            echo "Waiting $$CONTAINER"
-            sleep 2
+          # Wait for ClickHouse to be ready
+          until docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "SELECT 1" >/dev/null 2>&1; do
+            echo "Still waiting for $$CONTAINER..."
+            sleep 5
           done
           
-          echo "$$CONTAINER ready"
+          echo "$$CONTAINER is ready!"
           
-          docker exec -i "$$CONTAINER" clickhouse-client --multiquery < "$$INIT_SQL_FILE"
-          echo "Script executed $$CONTAINER complete."
+          # Create test user
+          docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$CREATE_USER_SQL"
+          echo "Created test user in $$CONTAINER"
+
+          docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$GRANT_SELECT_SQL"
+          echo "Granted SELECT permissions to test user in $$CONTAINER"
+          
+          # Grant INSERT permissions
+          docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$GRANT_INSERT_SQL"
+          echo "Granted INSERT permissions to test user in $$CONTAINER"
+          
+          # Execute initialization SQL
+          if [ -f "$$INIT_SQL_FILE" ]; then
+            docker exec -i "$$CONTAINER" clickhouse-client --user admin --password password --multiquery < "$$INIT_SQL_FILE"
+            echo "Initialization script executed for $$CONTAINER"
+          else
+            echo "No initialization script found at $$INIT_SQL_FILE"
+          fi
         done
         
-        echo "All ClickHouse containers initialized successfully"
+        echo "All ClickHouse containers initialized successfully!"
       '
     networks:
       - kafka-network

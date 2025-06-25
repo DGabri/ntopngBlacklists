@@ -2,6 +2,7 @@
 from confluent_kafka import Consumer, KafkaException, KafkaError
 from config.config_manager import ConfigManager
 from utils.redis_utils import RedisClusterConnector 
+from utils.db_connector import ClickhouseConnector 
 import json
 
 class AlertsConsumer:
@@ -26,6 +27,7 @@ class AlertsConsumer:
         # redis connector
         self.redis = RedisClusterConnector()
         print("[CONSUMER] INITIALIZED")
+        self.db = ClickhouseConnector()
 
         
     def consume_loop(self):
@@ -80,7 +82,7 @@ class AlertsConsumer:
                 else:
                     self.consumed_messages += 1
                     print(f"[CONSUMER] Processed message for {ip}. New count: {count}. Total processed: {self.consumed_messages}")
-
+                    self.db.insert_alert_blacklist(alert)
                 
                 print(f"[CONSUMER] IP: {ip} -> {count}")
             else:

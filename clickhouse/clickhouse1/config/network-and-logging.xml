@@ -1,13 +1,20 @@
-<clickhouse>
+<yandex>
     <logger>
-        <level>debug</level>
+        <level>information</level>
         <log>/var/log/clickhouse-server/clickhouse-server.log</log>
         <errorlog>/var/log/clickhouse-server/clickhouse-server.err.log</errorlog>
         <size>10M</size>
         <count>3</count>
     </logger>
-    <display_name>cluster_1S_2R node 1</display_name>
-    <listen_host>0.0.0.0</listen_host>
+
     <http_port>8123</http_port>
     <tcp_port>9000</tcp_port>
-</clickhouse>
+    
+    <listen_host>0.0.0.0</listen_host>
+    
+    <max_connections>4096</max_connections>
+    <keep_alive_timeout>3</keep_alive_timeout>
+    <max_concurrent_queries>100</max_concurrent_queries>
+    <uncompressed_cache_size>8589934592</uncompressed_cache_size>
+    <mark_cache_size>5368709120</mark_cache_size>
+</yandex>

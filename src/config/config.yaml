@@ -26,3 +26,9 @@ alerts_generator:
   num_alerts: 10
   num_ip_addresses: 10
   alert_interarrival_ms: 10
+
+clickhouse:
+  user: "test"
+  password: "password"
+  port: 8123
+  host: "clickhouse1"

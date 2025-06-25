@@ -1,14 +1,21 @@
+#!/usr/bin/env python3
 from utils.redis_utils import RedisClusterConnector
-from .db_connector import ClickhouseConnector
+from utils.db_connector import ClickhouseConnector
 from fastapi import FastAPI, Query, HTTPException
 from fastapi.responses import PlainTextResponse
 from typing import Optional, Dict, Any
 import json
 
+from clickhouse_connect import get_client
+
+# This should work from your api_server container
 app = FastAPI(title="Blacklists API", version="1.0.0")
 redis_connector = RedisClusterConnector()
-db = ClickhouseConnector(host="clickhouse1", port=9000, user='default', password='')
+db = ClickhouseConnector()
 
+print("--------------------------------------------")
+print(db.get_system_info())
+print("--------------------------------------------")
 alert_ids = [40, 41, 42, 61, 68, 79]
 
 categories_mapping = {

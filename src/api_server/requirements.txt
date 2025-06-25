@@ -1,4 +1,4 @@
-mysql-connector-python==9.2.0
+clickhouse-connect==0.8.18
 fastapi==0.115.13
 requests==2.32.4
 redis==5.2.1
