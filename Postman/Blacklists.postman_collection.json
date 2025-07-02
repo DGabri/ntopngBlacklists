@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "891bd5ba-ce26-46bc-b693-9bdc504d4776",
+		"name": "Blacklists",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "15599800"
+	},
+	"item": [
+		{
+			"name": "IP Events",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/ip_events/223.23.124.36",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"ip_events",
+						"223.23.124.36"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Blacklist",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/blacklists/41?format=json",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"blacklists",
+						"41"
+					],
+					"query": [
+						{
+							"key": "format",
+							"value": "json",
+							"description": "Format value, txt for download, json for response"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}

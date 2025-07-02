@@ -6,34 +6,13 @@ import re
 
 class ClickhouseConnector:
     def __init__(self):
-        """
-        Initialize the ClickhouseConnector with connection parameters.
-        
-        Args:
-            host: The Clickhouse server host
-            port: The Clickhouse HTTP port
-            user: The Clickhouse username
-            password: The Clickhouse password
-            database: The default database to connect to (optional)
-        """
         self.config = ConfigManager()
         self.db_config = self.config.get_clickhouse_config()
-        
-        #self.host = 
-        #self.port = port
-        #self.user = user
-        #self.password = password
-        #self.database = database or 'default'
-        
+                
         # ch client connector
         self.client = get_client(**self.db_config)
     
     def execute_query(self, query, params=None, fetch=False):
-        print("============================")
-        print(query)
-        print()
-        print(params)
-        print("============================")
         try:
             if fetch:
                 result = self.client.query(query, parameters=params)
@@ -58,7 +37,7 @@ class ClickhouseConnector:
         
         query = """
             SELECT timestamp, alert_id, info, reason 
-            FROM blacklist_events 
+            FROM replicated_blacklist_events 
             WHERE ip = {ip:String}
             ORDER BY timestamp DESC 
             LIMIT 10
@@ -138,7 +117,7 @@ class ClickhouseConnector:
         validated_event = self.validate_alert(event_dict)
         
         query = """
-            INSERT INTO blacklist_events 
+            INSERT INTO replicated_blacklist_events 
             (user_id, timestamp, ip, alert_id, dst_port, info, reason)
             VALUES ({user_id:String}, {timestamp:UInt64}, {ip:String}, 
                     {alert_id:UInt32}, {dst_port:UInt16}, {info:String}, {reason:String})
@@ -169,7 +148,7 @@ class ClickhouseConnector:
         
         # Use client.insert for efficient batch insert
         self.client.insert(
-            'blacklist_events',
+            'replicated_blacklist_events',
             data_rows,
             column_names=['user_id', 'timestamp', 'ip', 'alert_id', 'dst_port', 'info', 'reason']
         )

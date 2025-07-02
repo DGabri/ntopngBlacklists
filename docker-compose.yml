@@ -6,26 +6,32 @@ services:
     hostname: zookeeper
     ports:
       - "2181:2181"
+    healthcheck:
+      test: nc -z localhost 2181 || exit -1
+      interval: 10s
+      timeout: 5s
+      retries: 3
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SERVER_ID: 1
     volumes:
-      - /tmp/zookeeper-data:/var/lib/zookeeper/data
-      - /tmp/zookeeper-logs:/var/lib/zookeeper/log
+      - zookeeper-data:/var/lib/zookeeper/data
+      - zookeeper-logs:/var/lib/zookeeper/log
     networks:
       - kafka-network
 
-  kafka:
+  kafka1:
     image: confluentinc/cp-kafka:7.4.0
-    container_name: kafka
+    container_name: kafka1
     restart: unless-stopped
-    hostname: kafka
+    hostname: kafka1
     depends_on:
-      - zookeeper
+      zookeeper:
+        condition: service_healthy
     ports:
       - "9092:9092"
-      - "9093:9093"
+      - "29092:29092"
     healthcheck:
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29092"]
       interval: 10s
@@ -35,30 +41,105 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      
+
+      # two listeners: inter-broker and external clients
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://kafka1:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://192.168.2.221:9092
-      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:29092,PLAINTEXT_HOST://0.0.0.0:9092
+
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      
-      KAFKA_NUM_PARTITIONS: 1
-      
+            
       KAFKA_COMPRESSION_TYPE: lz4
       KAFKA_LOG_RETENTION_HOURS: 1
       KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
       KAFKA_LOG4J_LOGGERS: 'kafka=WARN,kafka.controller=WARN,kafka.log.LogCleaner=WARN,state.change.logger=WARN,kafka.producer.async.DefaultEventHandler=WARN'
 
     volumes:
-      - /tmp/kafka-data:/var/lib/kafka/data
+      - kafka1-data:/var/lib/kafka/data
 
     networks:
       - kafka-network
+
+  kafka2:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka2
+    restart: unless-stopped
+    hostname: kafka2
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9093:9093"
+      - "29093:29093"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29093"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9093,PLAINTEXT_HOST://kafka2:29093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_LOG_RETENTION_HOURS: 1
+      KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
+      KAFKA_LOG4J_LOGGERS: 'kafka=WARN,kafka.controller=WARN,kafka.log.LogCleaner=WARN,state.change.logger=WARN,kafka.producer.async.DefaultEventHandler=WARN'
+
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
+
+    networks:
+      - kafka-network
+
+  kafka3:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: kafka3
+    restart: unless-stopped
+    hostname: kafka3
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9094:9094"
+      - "29094:29094"
+    healthcheck:
+      test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29094"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    environment:
+      KAFKA_BROKER_ID: 3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094,PLAINTEXT_HOST://0.0.0.0:29094
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9094,PLAINTEXT_HOST://kafka3:29094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+
+      KAFKA_COMPRESSION_TYPE: lz4
+      KAFKA_LOG_RETENTION_HOURS: 1
+      KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
+      KAFKA_LOG4J_LOGGERS: 'kafka=WARN,kafka.controller=WARN,kafka.log.LogCleaner=WARN,state.change.logger=WARN,kafka.producer.async.DefaultEventHandler=WARN'
+
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
+
+    networks:
+      - kafka-network
+
 
   # start kafka and initialize topic
   kafka-setup:
     image: confluentinc/cp-kafka:7.4.0
     depends_on:
-      - kafka
+      - kafka1
     volumes:
       - ./src/config:/scripts
     command: bash /scripts/create_topic.sh
@@ -143,8 +224,10 @@ services:
         INIT_SQL_FILE="/clickhouse/create_tables.sql"
         CREATE_USER_SQL="CREATE USER IF NOT EXISTS test IDENTIFIED WITH plaintext_password BY '\''password'\'' HOST ANY;"
 
-        GRANT_SELECT_SQL="GRANT SELECT(timestamp, alert_id, info, reason, ip) ON default.blacklist_events TO test;"
-        GRANT_INSERT_SQL="GRANT INSERT(user_id, timestamp, ip, alert_id, dst_port, info, reason) ON default.blacklist_events TO test;"
+        GRANT_SELECT_SQL="GRANT SELECT(timestamp, alert_id, info, reason, ip) ON default.replicated_blacklist_events TO test;"
+        GRANT_INSERT_SQL="GRANT INSERT(user_id, timestamp, ip, alert_id, dst_port, info, reason) ON default.replicated_blacklist_events TO test;"
+        GRANT_SELECT_SQL_default_table="GRANT SELECT(timestamp, alert_id, info, reason, ip) ON default.blacklist_events TO test;"
+        GRANT_INSERT_SQL_default_table="GRANT INSERT(user_id, timestamp, ip, alert_id, dst_port, info, reason) ON default.blacklist_events TO test;"
     
         for CONTAINER in $$CONTAINERS; do
           echo "Waiting for $$CONTAINER to be available..."
@@ -161,11 +244,14 @@ services:
           docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$CREATE_USER_SQL"
           echo "Created test user in $$CONTAINER"
 
+          # Grant SELECT permissions
           docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$GRANT_SELECT_SQL"
+          docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$GRANT_SELECT_SQL_default_table"
           echo "Granted SELECT permissions to test user in $$CONTAINER"
           
           # Grant INSERT permissions
           docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$GRANT_INSERT_SQL"
+          docker exec "$$CONTAINER" clickhouse-client --user admin --password password -q "$$GRANT_INSERT_SQL_default_table"
           echo "Granted INSERT permissions to test user in $$CONTAINER"
           
           # Execute initialization SQL
@@ -489,7 +575,8 @@ services:
       dockerfile: api_server/Dockerfile
     container_name: api_server
     depends_on:
-      - kafka
+      - kafka1
+      - clickhouse-init
       - redis-cluster-creator
     ports:
       - "8000:8000"
@@ -503,7 +590,6 @@ services:
     build:
       context: ./src
       dockerfile: producer/Dockerfile
-    container_name: producer
     depends_on:
       clickhouse-init:
         condition: service_completed_successfully
@@ -519,10 +605,9 @@ services:
     build:
       context: ./src
       dockerfile: consumer/Dockerfile
-    container_name: consumer
     restart: unless-stopped
     depends_on:
-      kafka:
+      kafka1:
         condition: service_healthy
       redis-1:
         condition: service_healthy
@@ -542,6 +627,15 @@ networks:
     driver: bridge
 
 volumes:
+  zookeeper-data:
+  zookeeper-logs:
+  kafka1-data:
+  kafka2-data:
+  kafka3-data:
+  clickhouse1-data:
+  clickhouse1-logs:
+  clickhouse2-data:
+  clickhouse2-logs:
   redis-data-1:
   redis-data-2:
   redis-data-3:

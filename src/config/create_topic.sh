@@ -2,10 +2,10 @@
 
 set -e
 
-echo "[*] Waiting for Kafka to be ready at kafka:29092..."
+echo "[*] Waiting for Kafka to be ready at kafka1:29092..."
 
 # Wait until Kafka is reachable
-while ! nc -z kafka 29092; do
+while ! nc -z kafka1 29092; do
   sleep 1
 done
 
@@ -13,18 +13,22 @@ echo "[+] Kafka up, creating topis"
 
 # kafka setup
 # 30 minutes = 1800000ms for retention
-KAFKA_HOST="kafka:29092"
-PARTITION_COUNT=10
+KAFKA_BOOTSTRAP_SERVERS="kafka1:29092,kafka2:29093,kafka3:29094"
+PARTITION_COUNT=4
 RETENTION_MS=1800000
-REPLICATION_FACTOR=1
+REPLICATION_FACTOR=3
 
-# Topic names
+# Topic name
 TOPIC_NAME="blacklist-events"
 
-if kafka-topics --bootstrap-server kafka:29092 --list | grep -wq "$TOPIC_NAME"; then
+echo "[1] Creating topics "
+
+if kafka-topics --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS --list | grep -wq "^$topic_name$"; then
+    echo "Topic '$TOPIC_NAME' already exists - skipping creation"
+else
   # create topic
   kafka-topics --create \
-    --bootstrap-server $KAFKA_HOST \
+    --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS \
     --topic $TOPIC_NAME \
     --partitions $PARTITION_COUNT \
     --replication-factor $REPLICATION_FACTOR \
@@ -33,18 +37,15 @@ if kafka-topics --bootstrap-server kafka:29092 --list | grep -wq "$TOPIC_NAME"; 
     --if-not-exists
 
   echo "[1.1] Created topic: $TOPIC_NAME "
-else
-    echo "Topic 'blacklist-events' already exists - skipping creation"
 fi
-
-echo "[1] Creating topics "
-
-
 
 # show all topics
 echo "[2] List of topics:"
-kafka-topics --list --bootstrap-server $KAFKA_HOST
+kafka-topics --list --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS
 
 # descibe topic
 echo "Topic details:"
-kafka-topics --describe --bootstrap-server $KAFKA_HOST --topic $TOPIC_NAME
+kafka-topics --describe --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS --topic $TOPIC_NAME
+
+echo "Kafka setup completed, exiting..."
+exit 0;
