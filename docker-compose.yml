@@ -15,6 +15,10 @@ services:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_SERVER_ID: 1
+      # cleanup
+      ZOOKEEPER_AUTOPURGE_SNAP_RETAIN_COUNT: 3
+      ZOOKEEPER_AUTOPURGE_PURGE_INTERVAL: 24
+      ZOOKEEPER_MAX_SESSION_TIMEOUT: 40000
     volumes:
       - zookeeper-data:/var/lib/zookeeper/data
       - zookeeper-logs:/var/lib/zookeeper/log
@@ -35,28 +39,33 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29092"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 30s
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
-      # two listeners: inter-broker and external clients
+      
+      # stale sessions timeouts
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 18000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 12000
+      
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka1:9092,PLAINTEXT_HOST://kafka1:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-            
       KAFKA_COMPRESSION_TYPE: lz4
       KAFKA_LOG_RETENTION_HOURS: 1
       KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
       KAFKA_LOG4J_LOGGERS: 'kafka=WARN,kafka.controller=WARN,kafka.log.LogCleaner=WARN,state.change.logger=WARN,kafka.producer.async.DefaultEventHandler=WARN'
-
+      
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
     volumes:
       - kafka1-data:/var/lib/kafka/data
-
     networks:
       - kafka-network
 
@@ -74,13 +83,15 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29093"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 30s
     environment:
       KAFKA_BROKER_ID: 2
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 18000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 12000
+      
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9093,PLAINTEXT_HOST://0.0.0.0:29093
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka2:9093,PLAINTEXT_HOST://kafka2:29093
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -90,10 +101,14 @@ services:
       KAFKA_LOG_RETENTION_HOURS: 1
       KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
       KAFKA_LOG4J_LOGGERS: 'kafka=WARN,kafka.controller=WARN,kafka.log.LogCleaner=WARN,state.change.logger=WARN,kafka.producer.async.DefaultEventHandler=WARN'
-
+      
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
     volumes:
       - kafka2-data:/var/lib/kafka/data
-
     networks:
       - kafka-network
 
@@ -111,13 +126,15 @@ services:
     healthcheck:
       test: ["CMD", "bash", "-c", "echo > /dev/tcp/localhost/29094"]
       interval: 10s
-      timeout: 5s
+      timeout: 10s
       retries: 5
-      start_period: 20s
+      start_period: 30s
     environment:
       KAFKA_BROKER_ID: 3
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-
+      KAFKA_ZOOKEEPER_SESSION_TIMEOUT_MS: 18000
+      KAFKA_ZOOKEEPER_CONNECTION_TIMEOUT_MS: 12000
+      
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9094,PLAINTEXT_HOST://0.0.0.0:29094
       KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka3:9094,PLAINTEXT_HOST://kafka3:29094
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
@@ -127,19 +144,27 @@ services:
       KAFKA_LOG_RETENTION_HOURS: 1
       KAFKA_LOG4J_ROOT_LOGLEVEL: 'WARN'
       KAFKA_LOG4J_LOGGERS: 'kafka=WARN,kafka.controller=WARN,kafka.log.LogCleaner=WARN,state.change.logger=WARN,kafka.producer.async.DefaultEventHandler=WARN'
-
+      
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2
     volumes:
       - kafka3-data:/var/lib/kafka/data
-
     networks:
       - kafka-network
-
 
   # start kafka and initialize topic
   kafka-setup:
     image: confluentinc/cp-kafka:7.4.0
     depends_on:
-      - kafka1
+      kafka1:
+        condition: service_healthy
+      kafka2:
+        condition: service_healthy  
+      kafka3:
+        condition: service_healthy
     volumes:
       - ./src/config:/scripts
     command: bash /scripts/create_topic.sh
@@ -609,12 +634,16 @@ services:
     depends_on:
       kafka1:
         condition: service_healthy
-      redis-1:
+      kafka2:
         condition: service_healthy
-      redis-2:
+      kafka3:
         condition: service_healthy
-      redis-3:
-        condition: service_healthy
+      redis-cluster-creator:
+        condition: service_completed_successfully
+      clickhouse-init:
+        condition: service_completed_successfully
+      kafka-setup:
+        condition: service_completed_successfully
     networks:
       - kafka-network
     volumes:

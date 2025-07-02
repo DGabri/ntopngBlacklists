@@ -63,6 +63,11 @@ To launch the project simply run: <pre lang="markdown"> ```bash docker compose u
 
 To change the number of generated alerts, please modify [Configuration.yaml ](src/config/config.yaml)
 
+To check data in clickhouse: 
+<pre lang="markdown"> ```bash docker compose exec -it clickhouse1 clickhouse-client ```</pre> 
+and 
+`select * from replicated_blacklist_events`
+
 ### Running multiple consumers and producers
 To run more than 1 consumer or producer, after successful build run: <pre lang="markdown"> ```bash docker compose up --build --scale consumer=4 --scale producer=4```</pre>
 ` Be sure to use a maximum number of consumers equal to the number of partitions specified in [create_topics.sh ](src/config/create_topic.sh)

@@ -23,7 +23,7 @@ TOPIC_NAME="blacklist-events"
 
 echo "[1] Creating topics "
 
-if kafka-topics --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS --list | grep -wq "^$topic_name$"; then
+if kafka-topics --bootstrap-server $KAFKA_BOOTSTRAP_SERVERS --list | grep -wq "^$TOPIC_NAME$"; then
     echo "Topic '$TOPIC_NAME' already exists - skipping creation"
 else
   # create topic
