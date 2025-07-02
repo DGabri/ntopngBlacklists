@@ -23,7 +23,7 @@ redis:
   dedup_ttl: 3600
 
 alerts_generator:
-  num_alerts: 10
+  num_alerts: 10000
   num_ip_addresses: 30
   alert_interarrival_ms: 10
 
